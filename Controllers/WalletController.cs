@@ -25,4 +25,29 @@ public class WalletController : Controller
 
         return View(wallet);
     }
+
+    [HttpGet]
+    public IActionResult Fund()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Fund(decimal amount)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var wallet = await _context.Wallets
+            .FirstOrDefaultAsync(w => w.UserId == userId);
+
+        if (wallet == null)
+        {
+            return NotFound();
+        }
+
+        wallet.Balance += amount;
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("Index");
+    }
 }
