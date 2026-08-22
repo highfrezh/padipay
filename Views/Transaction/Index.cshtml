@@ -1,7 +1,9 @@
+@using System.Security.Claims
 @model List<PadiPay.Models.Transaction>
 
 @{
     ViewData["Title"] = "My Transactions";
+    var currentUserId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
 }
 
 <h2>My Transactions</h2>
@@ -13,6 +15,7 @@
             <th>Amount</th>
             <th>Status</th>
             <th>Created</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -22,6 +25,22 @@
                 <td>₦@t.Amount</td>
                 <td>@t.Status</td>
                 <td>@t.CreatedAt.ToLocalTime()</td>
+                <td>
+                    @if (t.SellerId == currentUserId && t.Status == PadiPay.Models.TransactionStatus.Funded)
+                    {
+                        <form asp-action="MarkDelivered" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@t.Id" />
+                            <button type="submit" class="btn btn-sm btn-warning">Mark Delivered</button>
+                        </form>
+                    }
+                    @if (t.BuyerId == currentUserId && t.Status == PadiPay.Models.TransactionStatus.Delivered)
+                    {
+                        <form asp-action="Release" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@t.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Release Funds</button>
+                        </form>
+                    }
+                </td>
             </tr>
         }
     </tbody>
