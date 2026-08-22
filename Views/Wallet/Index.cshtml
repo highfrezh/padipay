@@ -1,0 +1,16 @@
+@model PadiPay.Models.Wallet
+
+@{
+    ViewData["Title"] = "My Wallet";
+}
+
+<h2>My Wallet</h2>
+
+@if (Model == null)
+{
+    <p>No wallet found.</p>
+}
+else
+{
+    <p>Balance: ₦@Model.Balance</p>
+}
