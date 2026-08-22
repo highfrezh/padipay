@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "New Transaction";
+}
+
+<h2>New Escrow Transaction</h2>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label for="sellerEmail">Seller Email</label>
+        <input type="email" name="sellerEmail" class="form-control" required />
+    </div>
+    <div class="form-group mt-2">
+        <label for="amount">Amount (₦)</label>
+        <input type="number" step="0.01" name="amount" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Create Transaction</button>
+</form>

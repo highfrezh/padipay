@@ -1,0 +1,28 @@
+@model List<PadiPay.Models.Transaction>
+
+@{
+    ViewData["Title"] = "My Transactions";
+}
+
+<h2>My Transactions</h2>
+<a asp-action="Create" class="btn btn-primary mb-3">New Transaction</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var t in Model)
+        {
+            <tr>
+                <td>₦@t.Amount</td>
+                <td>@t.Status</td>
+                <td>@t.CreatedAt.ToLocalTime()</td>
+            </tr>
+        }
+    </tbody>
+</table>
