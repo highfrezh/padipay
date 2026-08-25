@@ -281,6 +281,72 @@ namespace PadiPay.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("PadiPay.Models.Gig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CoverImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DeliveryDays")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Requirements")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RevisionCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SellerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("SellerId");
+
+                    b.ToTable("Gigs");
+                });
+
             modelBuilder.Entity("PadiPay.Models.Transaction", b =>
                 {
                     b.Property<int>("Id")
@@ -385,6 +451,25 @@ namespace PadiPay.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PadiPay.Models.Gig", b =>
+                {
+                    b.HasOne("PadiPay.Models.Category", "Category")
+                        .WithMany("Gigs")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PadiPay.Models.ApplicationUser", "Seller")
+                        .WithMany("Gigs")
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Seller");
+                });
+
             modelBuilder.Entity("PadiPay.Models.Wallet", b =>
                 {
                     b.HasOne("PadiPay.Models.ApplicationUser", "User")
@@ -398,7 +483,14 @@ namespace PadiPay.Migrations
 
             modelBuilder.Entity("PadiPay.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("Gigs");
+
                     b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("PadiPay.Models.Category", b =>
+                {
+                    b.Navigation("Gigs");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,4 +8,7 @@ public class Category
     public string Description { get; set; } = string.Empty;
     public string Icon { get; set; } = "bi-code-slash";
     public int DisplayOrder { get; set; } = 0;
+
+    // Navigation property
+    public virtual ICollection<Gig> Gigs { get; set; } = new List<Gig>();
 }

@@ -1,0 +1,150 @@
+@model PadiPay.Models.Gig
+@using System.Security.Claims
+@{
+    ViewData["Title"] = Model.Title;
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    bool isOwner = currentUserId != null && currentUserId == Model.SellerId;
+}
+
+<div class="pp-fade-in" style="max-width: 1140px; margin: 1.5rem auto;">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none text-muted">Marketplace</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index" asp-route-categoryId="@Model.CategoryId" class="text-decoration-none text-muted">@Model.Category?.Name</a></li>
+            <li class="breadcrumb-item active text-truncate" style="max-width: 300px;" aria-current="page">@Model.Title</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Left Column: Gig Details & Seller Profile -->
+        <div class="col-lg-8">
+            <!-- Gig Title -->
+            <h1 class="brand-font mb-3" style="font-size: 1.85rem; line-height: 1.35;">@Model.Title</h1>
+
+            <!-- Seller Header Bar -->
+            <div class="d-flex align-items-center gap-3 p-3 mb-4 rounded-3 border bg-white shadow-xs">
+                <div class="pp-seller-avatar" style="width: 48px; height: 48px; font-size: 1.15rem;">
+                    @(Model.Seller?.FullName?.Substring(0, 1).ToUpper() ?? "U")
+                </div>
+                <div class="flex-grow-1 overflow-hidden">
+                    <div class="d-flex align-items-center gap-2">
+                        <h6 class="mb-0 fw-bold text-dark">@(Model.Seller?.FullName ?? "Tech Professional")</h6>
+                        <span class="pp-badge pp-badge-released small py-0.5"><i class="bi bi-patch-check-fill"></i> Verified Freelancer</span>
+                    </div>
+                    <div class="text-muted small text-truncate">
+                        @(Model.Seller?.Headline ?? "Software Developer") &bull; <i class="bi bi-geo-alt"></i> @(Model.Seller?.Location ?? "Nigeria")
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cover Image -->
+            <div class="mb-4 rounded-3 overflow-hidden border bg-dark" style="max-height: 420px;">
+                @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+                {
+                    <img src="@Model.CoverImageUrl" alt="@Model.Title" class="w-100 h-100 object-fit-cover" />
+                }
+                else
+                {
+                    <div class="p-5 text-center text-white-50">
+                        <i class="bi bi-code-slash display-1 mb-2 d-block text-success"></i>
+                        <span class="fw-semibold">PadiPay Tech Service</span>
+                    </div>
+                }
+            </div>
+
+            <!-- About This Gig -->
+            <div class="pp-card p-4 mb-4">
+                <h4 class="brand-font mb-3">About This Gig</h4>
+                <div class="text-secondary" style="white-space: pre-line; line-height: 1.8;">
+                    @Model.Description
+                </div>
+            </div>
+
+            <!-- Buyer Requirements -->
+            <div class="pp-card p-4 mb-4 border-start border-4 border-success">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-card-checklist text-success fs-5"></i>
+                    <h5 class="brand-font mb-0">What this seller needs from you to start:</h5>
+                </div>
+                <p class="text-muted small mb-2">After placing your order and funding escrow, you'll be asked to provide:</p>
+                <div class="bg-light p-3 rounded-2 text-dark small" style="white-space: pre-line;">
+                    @Model.Requirements
+                </div>
+            </div>
+
+            <!-- Tags / Tech Stack -->
+            @if (!string.IsNullOrWhiteSpace(Model.Tags))
+            {
+                <div class="mb-4">
+                    <h6 class="text-muted small fw-bold mb-2 text-uppercase">Tech Stack & Tags</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var tag in Model.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                        {
+                            <span class="badge bg-white text-dark border px-3 py-2 rounded-pill small">#@tag</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Right Column: Sticky Order & Escrow Card -->
+        <div class="col-lg-4">
+            <div class="position-sticky" style="top: 85px;">
+                <div class="pp-card p-4 shadow-sm border-2">
+                    <!-- Price Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                        <span class="text-muted fw-semibold">Service Price</span>
+                        <span class="brand-font fs-2 fw-bold text-success">₦@Model.Price.ToString("N0")</span>
+                    </div>
+
+                    <!-- Package Features -->
+                    <div class="d-flex flex-column gap-2.5 mb-4 small">
+                        <div class="d-flex justify-content-between py-1">
+                            <span class="text-muted"><i class="bi bi-clock-history me-2 text-primary"></i>Delivery Turnaround</span>
+                            <strong class="text-dark">@Model.DeliveryDays Days</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1">
+                            <span class="text-muted"><i class="bi bi-arrow-repeat me-2 text-success"></i>Revisions Included</span>
+                            <strong class="text-dark">@Model.RevisionCount</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1">
+                            <span class="text-muted"><i class="bi bi-shield-check me-2 text-success"></i>Payment Security</span>
+                            <strong class="text-success">100% Escrow</strong>
+                        </div>
+                    </div>
+
+                    <!-- Order Action Button -->
+                    @if (isOwner)
+                    {
+                        <div class="alert alert-warning small py-2 text-center mb-3">
+                            <i class="bi bi-info-circle me-1"></i> You are the creator of this gig.
+                        </div>
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary w-100 py-2.5 fw-bold">
+                            <i class="bi bi-pencil-fill me-1"></i> Edit This Gig
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="#" class="btn btn-emerald w-100 py-2.5 fs-6 shadow-sm mb-3">
+                            <i class="bi bi-lock-fill me-1"></i> Order & Fund Escrow (₦@Model.Price.ToString("N0"))
+                        </a>
+                    }
+
+                    <!-- Escrow Trust Assurance Box -->
+                    <div class="p-3 rounded-3 bg-light border mt-3">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="text-success fs-5"><i class="bi bi-shield-lock-fill"></i></span>
+                            <h6 class="mb-0 fw-bold small">PadiPay Escrow Guarantee</h6>
+                        </div>
+                        <ul class="list-unstyled small text-muted mb-0 d-flex flex-column gap-1.5" style="font-size: 0.82rem;">
+                            <li><i class="bi bi-check2 text-success me-1"></i> Funds held securely until you inspect the delivered work.</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> Request revisions if work doesn't meet requirements.</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> PadiPay Admin dispute protection if any issues arise.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

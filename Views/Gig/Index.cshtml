@@ -1,0 +1,173 @@
+@model List<PadiPay.Models.Gig>
+@{
+    ViewData["Title"] = "Explore Tech Gigs & Freelancers";
+    var categories = ViewBag.Categories as List<PadiPay.Models.Category> ?? new List<PadiPay.Models.Category>();
+    int? currentCat = ViewBag.CurrentCategory as int?;
+    string? currentSearch = ViewBag.CurrentSearch as string;
+    string? currentSort = ViewBag.CurrentSort as string;
+}
+
+<div class="pp-fade-in" style="max-width: 1200px; margin: 1rem auto;">
+    <!-- Marketplace Hero Header -->
+    <div class="pp-card p-4 p-md-5 mb-4 text-center text-md-start" style="background: radial-gradient(circle at top right, rgba(0, 192, 118, 0.12), transparent 50%), #FFFFFF;">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="d-inline-flex align-items-center gap-2 mb-2">
+                    <span class="pp-escrow-pill">
+                        <i class="bi bi-shield-check text-success"></i> Escrow Protected
+                    </span>
+                    <span class="pp-badge pp-badge-released">🇳🇬 Nigerian Tech Marketplace</span>
+                </div>
+                <h1 class="display-6 brand-font fw-bold mb-2">Hire Verified Nigerian Tech Talent</h1>
+                <p class="text-muted mb-4" style="font-size: 1.05rem;">
+                    Find software engineers, mobile developers, UI/UX designers, and tech experts. Funds are only released when you are 100% satisfied.
+                </p>
+
+                <!-- Search Form -->
+                <form asp-action="Index" method="get" class="row g-2">
+                    <input type="hidden" name="categoryId" value="@currentCat" />
+                    <input type="hidden" name="sort" value="@currentSort" />
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" name="search" value="@currentSearch" class="form-control pp-input border-start-0" placeholder="Search gigs: React, .NET, Flutter, Figma, DevOps, API..." />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            Search Gigs
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block text-center">
+                <div class="p-4 rounded-4 bg-light border text-start shadow-sm">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="rounded-circle p-3 bg-success bg-opacity-10 text-success fs-3">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small fw-semibold">PadiPay Guarantee</div>
+                            <div class="fw-bold">Zero Financial Risk</div>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">Your payment is locked in escrow until the freelancer delivers according to your project specifications.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Pills Filter -->
+    <div class="mb-4 d-flex align-items-center gap-2 overflow-auto pb-2" style="scrollbar-width: thin;">
+        <a asp-action="Index" asp-route-search="@currentSearch" asp-route-sort="@currentSort" 
+           class="btn btn-sm rounded-pill px-3 fw-bold @(!currentCat.HasValue ? "btn-dark" : "btn-outline-secondary")">
+            All Categories
+        </a>
+        @foreach (var cat in categories)
+        {
+            <a asp-action="Index" asp-route-categoryId="@cat.Id" asp-route-search="@currentSearch" asp-route-sort="@currentSort"
+               class="btn btn-sm rounded-pill px-3 fw-semibold text-nowrap @(currentCat == cat.Id ? "btn-dark" : "btn-outline-secondary")">
+                <i class="bi @cat.Icon me-1"></i> @cat.Name
+            </a>
+        }
+    </div>
+
+    <!-- Filter & Results Count Toolbar -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-2 border-bottom">
+        <div>
+            <span class="text-muted small">Showing </span>
+            <strong class="text-dark">@Model.Count Gigs available</strong>
+            @if (!string.IsNullOrEmpty(currentSearch))
+            {
+                <span class="text-muted small"> for "@currentSearch"</span>
+            }
+        </div>
+
+        <!-- Sorting Dropdown -->
+        <div class="d-flex align-items-center gap-2">
+            <span class="text-muted small text-nowrap">Sort by:</span>
+            <form asp-action="Index" method="get" class="d-inline" id="sortForm">
+                <input type="hidden" name="search" value="@currentSearch" />
+                <input type="hidden" name="categoryId" value="@currentCat" />
+                <select name="sort" class="form-select form-select-sm pp-input py-1" onchange="document.getElementById('sortForm').submit()">
+                    <option value="" selected="@(string.IsNullOrEmpty(currentSort))">Newest First</option>
+                    <option value="price_asc" selected="@(currentSort == "price_asc")">Price: Low to High</option>
+                    <option value="price_desc" selected="@(currentSort == "price_desc")">Price: High to Low</option>
+                    <option value="fastest" selected="@(currentSort == "fastest")">Fastest Delivery</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- Gigs Grid -->
+    @if (!Model.Any())
+    {
+        <div class="pp-card text-center p-5">
+            <div class="display-4 text-muted mb-3"><i class="bi bi-search"></i></div>
+            <h4 class="brand-font">No matching gigs found</h4>
+            <p class="text-muted small mb-4">Try adjusting your search terms, changing the category, or clearing filters.</p>
+            <a asp-action="Index" class="btn btn-outline-primary btn-sm">Clear All Filters</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var gig in Model)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a asp-action="Details" asp-route-id="@gig.Id" class="pp-gig-card">
+                        <!-- Cover Image -->
+                        <div class="pp-gig-img-wrap">
+                            @if (!string.IsNullOrEmpty(gig.CoverImageUrl))
+                            {
+                                <img src="@gig.CoverImageUrl" alt="@gig.Title" class="pp-gig-img" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white-50">
+                                    <i class="bi bi-laptop fs-1"></i>
+                                </div>
+                            }
+                            <span class="pp-gig-category-badge">@gig.Category?.Name</span>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="pp-gig-body">
+                            <!-- Seller Info -->
+                            <div class="pp-gig-seller">
+                                <div class="pp-seller-avatar">
+                                    @(gig.Seller?.FullName?.Substring(0, 1).ToUpper() ?? "U")
+                                </div>
+                                <div class="overflow-hidden">
+                                    <div class="fw-bold text-dark small text-truncate">
+                                        @(gig.Seller?.FullName ?? "Tech Pro")
+                                    </div>
+                                    <div class="text-muted small text-truncate" style="font-size: 0.75rem;">
+                                        <i class="bi bi-geo-alt me-1"></i>@(gig.Seller?.Location ?? "Nigeria")
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Gig Title -->
+                            <h6 class="pp-gig-title">
+                                @gig.Title
+                            </h6>
+
+                            <!-- Turnaround & Rating preview -->
+                            <div class="d-flex align-items-center gap-3 text-muted small my-2" style="font-size: 0.8rem;">
+                                <span><i class="bi bi-clock me-1 text-primary"></i>@gig.DeliveryDays Days</span>
+                                <span><i class="bi bi-arrow-repeat me-1 text-success"></i>@gig.RevisionCount Revs</span>
+                            </div>
+
+                            <!-- Footer Price -->
+                            <div class="pp-gig-footer">
+                                <span class="text-muted small">Starting at</span>
+                                <span class="pp-gig-price">₦@gig.Price.ToString("N0")</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+</div>

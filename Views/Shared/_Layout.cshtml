@@ -1,56 +1,170 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - PadiPay</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - PadiPay | Nigeria's Tech Freelance Escrow Marketplace</title>
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    
+    <!-- Custom PadiPay Modern Design System -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/PadiPay.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">PadiPay</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+    <!-- Top Escrow Trust Banner -->
+    <div class="bg-dark text-white py-1 px-3 text-center small" style="font-size: 0.8rem; background: #0B0F19 !important;">
+        <span class="text-success me-1">🛡️</span> 100% Escrow Protected: Funds held safely until Nigerian tech talent delivers your work.
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <header class="pp-navbar">
+        <nav class="navbar navbar-expand-lg navbar-light py-2">
+            <div class="container-fluid px-lg-4">
+                <!-- Brand Logo -->
+                <a class="pp-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span class="text-success"><i class="bi bi-shield-lock-fill"></i></span>
+                    <span>PadiPay</span>
+                    <span class="pp-brand-badge">NG 🇳🇬</span>
+                </a>
+
+                <!-- Mobile Toggle Button -->
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <!-- Nav Items -->
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="pp-nav-link" asp-area="" asp-controller="Gig" asp-action="Index">
+                                <i class="bi bi-grid-fill text-muted"></i> Explore Gigs
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Wallet" asp-action="Index">My Wallet</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Transaction" asp-action="Index">Transactions</a>
-                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="pp-nav-link" asp-area="" asp-controller="Gig" asp-action="MyGigs">
+                                    <i class="bi bi-briefcase-fill text-muted"></i> My Gigs
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="pp-nav-link" asp-area="" asp-controller="Wallet" asp-action="Index">
+                                    <i class="bi bi-wallet2 text-muted"></i> My Wallet
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="pp-nav-link" asp-area="" asp-controller="Transaction" asp-action="Index">
+                                    <i class="bi bi-arrow-left-right text-muted"></i> Escrow Orders
+                                </a>
+                            </li>
+                        }
                     </ul>
-                    <partial name="_LoginPartial" />
+
+                    <!-- Right-Side CTAs & Profile -->
+                    <div class="d-flex align-items-center gap-2">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a asp-area="" asp-controller="Gig" asp-action="Create" class="btn btn-primary btn-sm me-2">
+                                <i class="bi bi-plus-circle me-1"></i> Post a Gig
+                            </a>
+                        }
+                        <partial name="_LoginPartial" />
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - PadiPay - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Main Content Body -->
+    <main role="main" class="container-fluid px-lg-4 py-4">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show pp-fade-in mb-4 d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <div>@TempData["SuccessMessage"]</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show pp-fade-in mb-4 d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                <div>@TempData["ErrorMessage"]</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @RenderBody()
+    </main>
+
+    <!-- Modern Marketplace Footer -->
+    <footer class="pp-footer">
+        <div class="container-fluid px-lg-4">
+            <div class="row g-4 pb-4 border-bottom border-secondary border-opacity-25">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="fs-4 text-success"><i class="bi bi-shield-lock-fill"></i></span>
+                        <h4 class="text-white mb-0 brand-font">PadiPay</h4>
+                        <span class="pp-brand-badge">NG 🇳🇬</span>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Nigeria's premier escrow-powered tech freelance marketplace. Safely hire developers, designers, DevOps engineers, and technical talent with complete financial peace of mind.
+                    </p>
+                    <div class="pp-escrow-pill text-white border-secondary">
+                        <i class="bi bi-lock-fill text-success"></i> Secured by Automated Escrow
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6 class="text-white mb-3">Categories</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-2 text-muted">
+                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="1" class="text-decoration-none text-muted">Web Development</a></li>
+                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="2" class="text-decoration-none text-muted">Mobile Apps</a></li>
+                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="3" class="text-decoration-none text-muted">UI/UX Design</a></li>
+                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="4" class="text-decoration-none text-muted">Cloud & DevOps</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6 class="text-white mb-3">Freelancers</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-2 text-muted">
+                        <li><a asp-controller="Gig" asp-action="Create" class="text-decoration-none text-muted">Become a Seller</a></li>
+                        <li><a asp-controller="Gig" asp-action="MyGigs" class="text-decoration-none text-muted">Manage Gigs</a></li>
+                        <li><a asp-controller="Wallet" asp-action="Index" class="text-decoration-none text-muted">Escrow Wallet</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <h6 class="text-white mb-3">Built for Nigeria's Tech Future</h6>
+                    <p class="text-muted small">
+                        PadiPay solves the trust deficit in remote tech hiring by locking funds until milestones are delivered.
+                    </p>
+                    <div class="d-flex align-items-center gap-2 text-muted small">
+                        <i class="bi bi-geo-alt-fill text-success"></i> Lagos, Abuja, Port Harcourt & Nationwide
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center pt-3 small text-muted">
+                <div>&copy; @DateTime.UtcNow.Year PadiPay Technologies. All rights reserved.</div>
+                <div class="d-flex gap-3 mt-2 mt-md-0">
+                    <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">Privacy Policy</a>
+                    <a href="#" class="text-decoration-none text-muted">Terms of Escrow</a>
+                </div>
+            </div>
         </div>
     </footer>
+
+    <!-- Bootstrap Bundle JS -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -15,4 +15,5 @@ public class ApplicationUser : IdentityUser
 
     // Navigation properties
     public virtual Wallet? Wallet { get; set; }
+    public virtual ICollection<Gig> Gigs { get; set; } = new List<Gig>();
 }

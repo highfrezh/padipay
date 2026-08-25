@@ -1,0 +1,133 @@
+@model PadiPay.ViewModels.CreateGigViewModel
+@{
+    ViewData["Title"] = "Post a New Tech Gig";
+}
+
+<div class="pp-fade-in" style="max-width: 860px; margin: 1.5rem auto;">
+    <!-- Breadcrumb & Back -->
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <a asp-action="MyGigs" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to My Gigs
+        </a>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="pp-card p-4 p-md-5">
+        <div class="mb-4 pb-3 border-bottom">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="pp-escrow-pill">
+                    <i class="bi bi-code-slash text-success"></i> Tech Freelancer
+                </span>
+                <span class="pp-badge pp-badge-funded">
+                    <i class="bi bi-shield-check"></i> Escrow Backed
+                </span>
+            </div>
+            <h2 class="brand-font mb-1">Create a Service Listing</h2>
+            <p class="text-muted small mb-0">Define your scope, turnaround time, pricing in Naira (₦), and buyer requirements.</p>
+        </div>
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <!-- Gig Title -->
+            <div class="mb-4">
+                <label asp-for="Title" class="form-label fw-bold"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted fw-semibold">I will</span>
+                    <input asp-for="Title" class="form-control pp-input" placeholder="build a modern ASP.NET Core & React web app with payment integration" />
+                </div>
+                <span asp-validation-for="Title" class="text-danger small"></span>
+                <div class="form-text small text-muted">Keep it clear, professional, and outcome-oriented.</div>
+            </div>
+
+            <!-- Category & Delivery Grid -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="CategoryId" class="form-label fw-bold"></label>
+                    <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select pp-input">
+                        <option value="">-- Select Tech Category --</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="DeliveryDays" class="form-label fw-bold"></label>
+                    <div class="input-group">
+                        <input asp-for="DeliveryDays" class="form-control pp-input" type="number" min="1" max="90" />
+                        <span class="input-group-text bg-light text-muted">Days</span>
+                    </div>
+                    <span asp-validation-for="DeliveryDays" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <!-- Price & Revisions Grid -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="Price" class="form-label fw-bold"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-success text-white fw-bold">₦</span>
+                        <input asp-for="Price" class="form-control pp-input fs-5 fw-bold" type="number" step="500" min="1000" />
+                    </div>
+                    <span asp-validation-for="Price" class="text-danger small"></span>
+                    <div class="form-text small text-muted">Held safely in escrow upon buyer order.</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="RevisionCount" class="form-label fw-bold"></label>
+                    <select asp-for="RevisionCount" class="form-select pp-input">
+                        <option value="0">0 (No revisions)</option>
+                        <option value="1">1 Revision</option>
+                        <option value="2" selected>2 Revisions (Standard)</option>
+                        <option value="3">3 Revisions</option>
+                        <option value="5">5 Revisions</option>
+                        <option value="10">Unlimited / 10 Revisions</option>
+                    </select>
+                    <span asp-validation-for="RevisionCount" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <!-- Detailed Description -->
+            <div class="mb-4">
+                <label asp-for="Description" class="form-label fw-bold"></label>
+                <textarea asp-for="Description" class="form-control pp-input" rows="6" placeholder="Describe your technical expertise, what technologies you use, deliverables included, and why clients should choose you..."></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+
+            <!-- Buyer Requirements -->
+            <div class="mb-4">
+                <label asp-for="Requirements" class="form-label fw-bold"></label>
+                <textarea asp-for="Requirements" class="form-control pp-input" rows="3" placeholder="e.g. Please provide: 1. Figma link or UI wireframes, 2. Database specifications, 3. API keys or endpoints (if needed)"></textarea>
+                <span asp-validation-for="Requirements" class="text-danger small"></span>
+                <div class="form-text small text-muted">The buyer will be prompted to supply these details immediately after funding the escrow.</div>
+            </div>
+
+            <!-- Tags -->
+            <div class="mb-4">
+                <label asp-for="Tags" class="form-label fw-bold"></label>
+                <input asp-for="Tags" class="form-control pp-input" placeholder="e.g. dotnet, csharp, react, sql, fullstack, azure" />
+                <span asp-validation-for="Tags" class="text-danger small"></span>
+                <div class="form-text small text-muted">Comma-separated tags to help clients discover your gig in search.</div>
+            </div>
+
+            <!-- Cover Image Upload -->
+            <div class="mb-4">
+                <label asp-for="CoverImage" class="form-label fw-bold"></label>
+                <input asp-for="CoverImage" class="form-control pp-input" type="file" accept="image/*" />
+                <span asp-validation-for="CoverImage" class="text-danger small"></span>
+                <div class="form-text small text-muted">Upload a crisp banner/preview image (JPG, PNG, WebP) showcasing your project sample or service title.</div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                <a asp-action="MyGigs" class="btn btn-outline-secondary px-4">Cancel</a>
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">
+                    <i class="bi bi-rocket-takeoff me-1"></i> Publish Tech Gig
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

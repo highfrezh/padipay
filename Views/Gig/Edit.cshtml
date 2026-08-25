@@ -1,0 +1,144 @@
+@model PadiPay.ViewModels.EditGigViewModel
+@{
+    ViewData["Title"] = "Edit Gig: " + Model.Title;
+}
+
+<div class="pp-fade-in" style="max-width: 860px; margin: 1.5rem auto;">
+    <!-- Breadcrumb & Back -->
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <a asp-action="MyGigs" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to My Gigs
+        </a>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="pp-card p-4 p-md-5">
+        <div class="mb-4 pb-3 border-bottom d-flex justify-content-between align-items-start">
+            <div>
+                <span class="pp-badge pp-badge-funded mb-2">Edit Service Listing</span>
+                <h2 class="brand-font mb-1">Update Gig Details</h2>
+                <p class="text-muted small mb-0">Modify pricing, turnaround time, description, or toggle availability.</p>
+            </div>
+            <div>
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary" target="_blank">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Preview
+                </a>
+            </div>
+        </div>
+
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ExistingCoverImageUrl" />
+
+            <!-- Active Status Toggle -->
+            <div class="p-3 mb-4 rounded-3 border bg-light d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1 fw-bold">Gig Availability Status</h6>
+                    <p class="text-muted small mb-0">When active, your gig is visible in search and clients can place orders.</p>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" id="statusSwitch" />
+                </div>
+            </div>
+
+            <!-- Gig Title -->
+            <div class="mb-4">
+                <label asp-for="Title" class="form-label fw-bold"></label>
+                <input asp-for="Title" class="form-control pp-input" />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <!-- Category & Delivery Grid -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="CategoryId" class="form-label fw-bold"></label>
+                    <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select pp-input"></select>
+                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="DeliveryDays" class="form-label fw-bold"></label>
+                    <div class="input-group">
+                        <input asp-for="DeliveryDays" class="form-control pp-input" type="number" min="1" max="90" />
+                        <span class="input-group-text bg-light text-muted">Days</span>
+                    </div>
+                    <span asp-validation-for="DeliveryDays" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <!-- Price & Revisions Grid -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="Price" class="form-label fw-bold"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-success text-white fw-bold">₦</span>
+                        <input asp-for="Price" class="form-control pp-input fs-5 fw-bold" type="number" step="500" min="1000" />
+                    </div>
+                    <span asp-validation-for="Price" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="RevisionCount" class="form-label fw-bold"></label>
+                    <select asp-for="RevisionCount" class="form-select pp-input">
+                        <option value="0">0 (No revisions)</option>
+                        <option value="1">1 Revision</option>
+                        <option value="2">2 Revisions (Standard)</option>
+                        <option value="3">3 Revisions</option>
+                        <option value="5">5 Revisions</option>
+                        <option value="10">Unlimited / 10 Revisions</option>
+                    </select>
+                    <span asp-validation-for="RevisionCount" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <!-- Detailed Description -->
+            <div class="mb-4">
+                <label asp-for="Description" class="form-label fw-bold"></label>
+                <textarea asp-for="Description" class="form-control pp-input" rows="6"></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+
+            <!-- Buyer Requirements -->
+            <div class="mb-4">
+                <label asp-for="Requirements" class="form-label fw-bold"></label>
+                <textarea asp-for="Requirements" class="form-control pp-input" rows="3"></textarea>
+                <span asp-validation-for="Requirements" class="text-danger small"></span>
+            </div>
+
+            <!-- Tags -->
+            <div class="mb-4">
+                <label asp-for="Tags" class="form-label fw-bold"></label>
+                <input asp-for="Tags" class="form-control pp-input" />
+                <span asp-validation-for="Tags" class="text-danger small"></span>
+            </div>
+
+            <!-- Cover Image Management -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Cover Image</label>
+                @if (!string.IsNullOrEmpty(Model.ExistingCoverImageUrl))
+                {
+                    <div class="mb-2" style="max-width: 280px;">
+                        <img src="@Model.ExistingCoverImageUrl" alt="Current Cover" class="img-fluid rounded-3 border" />
+                        <div class="text-muted small mt-1">Current cover image</div>
+                    </div>
+                }
+                <label asp-for="CoverImage" class="form-label small text-muted">Upload new image to replace current banner (optional):</label>
+                <input asp-for="CoverImage" class="form-control pp-input" type="file" accept="image/*" />
+                <span asp-validation-for="CoverImage" class="text-danger small"></span>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                <a asp-action="MyGigs" class="btn btn-outline-secondary px-4">Cancel</a>
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">
+                    <i class="bi bi-check2-circle me-1"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

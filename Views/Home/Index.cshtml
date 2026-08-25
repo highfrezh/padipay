@@ -1,8 +1,217 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Nigeria's Escrow-Powered Tech Freelance Marketplace";
+    var categories = ViewBag.Categories as List<PadiPay.Models.Category> ?? new List<PadiPay.Models.Category>();
+    var recentGigs = ViewBag.RecentGigs as List<PadiPay.Models.Gig> ?? new List<PadiPay.Models.Gig>();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section -->
+<section class="py-5 px-3 px-md-4 mb-5 rounded-4 position-relative overflow-hidden" 
+         style="background: radial-gradient(circle at top right, rgba(0, 192, 118, 0.15), transparent 60%), radial-gradient(circle at bottom left, rgba(79, 70, 229, 0.1), transparent 50%), #0B0F19; color: white;">
+    <div class="container-fluid py-md-4 position-relative" style="z-index: 2;">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill mb-3" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.15);">
+                    <span class="text-success fs-6"><i class="bi bi-shield-fill-check"></i></span>
+                    <span class="small fw-semibold text-white">Nigeria's Escrow-Powered Tech Marketplace</span>
+                </div>
+
+                <h1 class="display-4 brand-font fw-bold mb-3" style="color: white; line-height: 1.15; letter-spacing: -0.03em;">
+                    Hire Top Nigerian Tech Talent with <span style="color: var(--pp-emerald);">100% Escrow Trust.</span>
+                </h1>
+
+                <p class="lead mb-4 text-white-50" style="font-size: 1.15rem; max-width: 580px;">
+                    Find elite software engineers, mobile developers, UI/UX designers, and DevOps pros. Your funds are protected in escrow and only released when you approve the delivered work.
+                </p>
+
+                <!-- Search Bar -->
+                <form asp-controller="Gig" asp-action="Index" method="get" class="p-2 rounded-3 mb-4 shadow-lg" style="background: white; max-width: 620px;">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-search"></i></span>
+                                <input type="text" name="search" class="form-control border-0 shadow-none text-dark" placeholder="Try: ASP.NET Core, React, Figma, Flutter, API..." style="font-size: 0.95rem;" />
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="submit" class="btn btn-emerald w-100 py-2">
+                                Find Freelancers
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Quick Tags -->
+                <div class="d-flex flex-wrap align-items-center gap-2 small text-white-50">
+                    <span class="fw-semibold text-white">Popular:</span>
+                    <a asp-controller="Gig" asp-action="Index" asp-route-search="dotnet" class="badge bg-white bg-opacity-10 text-white text-decoration-none px-2.5 py-1.5 rounded-pill">.NET 10</a>
+                    <a asp-controller="Gig" asp-action="Index" asp-route-search="react" class="badge bg-white bg-opacity-10 text-white text-decoration-none px-2.5 py-1.5 rounded-pill">React</a>
+                    <a asp-controller="Gig" asp-action="Index" asp-route-search="figma" class="badge bg-white bg-opacity-10 text-white text-decoration-none px-2.5 py-1.5 rounded-pill">UI/UX Design</a>
+                    <a asp-controller="Gig" asp-action="Index" asp-route-search="flutter" class="badge bg-white bg-opacity-10 text-white text-decoration-none px-2.5 py-1.5 rounded-pill">Flutter</a>
+                </div>
+            </div>
+
+            <!-- Hero Right Card / Trust Graphic -->
+            <div class="col-lg-5 text-center">
+                <div class="p-4 p-md-5 rounded-4 text-start shadow-lg" style="background: rgba(19, 27, 46, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="pp-seller-avatar" style="width: 52px; height: 52px; font-size: 1.25rem;">
+                            ₦
+                        </div>
+                        <div>
+                            <h5 class="brand-font mb-0 text-white">PadiPay Trust Engine</h5>
+                            <span class="badge bg-success bg-opacity-25 text-success small py-0.5">Automated Escrow</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-start gap-3 p-2.5 rounded-3" style="background: rgba(255, 255, 255, 0.04);">
+                            <i class="bi bi-1-circle-fill text-success fs-5"></i>
+                            <div>
+                                <strong class="text-white d-block small">Buyer Funds Escrow</strong>
+                                <span class="text-white-50" style="font-size: 0.8rem;">Your payment is safely held by PadiPay — never paid directly upfront.</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start gap-3 p-2.5 rounded-3" style="background: rgba(255, 255, 255, 0.04);">
+                            <i class="bi bi-2-circle-fill text-primary fs-5"></i>
+                            <div>
+                                <strong class="text-white d-block small">Seller Delivers Proof of Work</strong>
+                                <span class="text-white-50" style="font-size: 0.8rem;">Freelancer builds and submits code repositories, designs, or live previews.</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start gap-3 p-2.5 rounded-3" style="background: rgba(255, 255, 255, 0.04);">
+                            <i class="bi bi-3-circle-fill text-warning fs-5"></i>
+                            <div>
+                                <strong class="text-white d-block small">Inspect & Release</strong>
+                                <span class="text-white-50" style="font-size: 0.8rem;">Confirm satisfaction to release funds, or request unlimited revisions.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                        <span class="small text-white-50">Admin Arbitration Protected</span>
+                        <span class="text-success small fw-bold"><i class="bi bi-check-all fs-5 me-1"></i>Guaranteed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-success fw-bold small text-uppercase letter-spacing-1">Browse by Domain</span>
+            <h2 class="brand-font mb-0">Tech Skill Categories</h2>
+        </div>
+        <a asp-controller="Gig" asp-action="Index" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            View All Categories <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="row g-3">
+        @foreach (var cat in categories)
+        {
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a asp-controller="Gig" asp-action="Index" asp-route-categoryId="@cat.Id" class="pp-card pp-card-hover p-4 text-decoration-none text-dark h-100 d-flex flex-column">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="rounded-3 p-3 bg-success bg-opacity-10 text-success fs-3">
+                            <i class="bi @cat.Icon"></i>
+                        </div>
+                        <i class="bi bi-arrow-up-right text-muted"></i>
+                    </div>
+                    <h5 class="brand-font mb-1">@cat.Name</h5>
+                    <p class="text-muted small mb-0 mt-auto">@cat.Description</p>
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Featured Gigs Section -->
+@if (recentGigs.Any())
+{
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="text-success fw-bold small text-uppercase letter-spacing-1">Handpicked Tech Services</span>
+                <h2 class="brand-font mb-0">Latest Gigs on PadiPay</h2>
+            </div>
+            <a asp-controller="Gig" asp-action="Index" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                Explore All Gigs <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var gig in recentGigs)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a asp-controller="Gig" asp-action="Details" asp-route-id="@gig.Id" class="pp-gig-card">
+                        <div class="pp-gig-img-wrap">
+                            @if (!string.IsNullOrEmpty(gig.CoverImageUrl))
+                            {
+                                <img src="@gig.CoverImageUrl" alt="@gig.Title" class="pp-gig-img" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white-50">
+                                    <i class="bi bi-laptop fs-1"></i>
+                                </div>
+                            }
+                            <span class="pp-gig-category-badge">@gig.Category?.Name</span>
+                        </div>
+
+                        <div class="pp-gig-body">
+                            <div class="pp-gig-seller">
+                                <div class="pp-seller-avatar">
+                                    @(gig.Seller?.FullName?.Substring(0, 1).ToUpper() ?? "U")
+                                </div>
+                                <div class="overflow-hidden">
+                                    <div class="fw-bold text-dark small text-truncate">
+                                        @(gig.Seller?.FullName ?? "Tech Pro")
+                                    </div>
+                                    <div class="text-muted small text-truncate" style="font-size: 0.75rem;">
+                                        <i class="bi bi-geo-alt me-1"></i>@(gig.Seller?.Location ?? "Nigeria")
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="pp-gig-title">
+                                @gig.Title
+                            </h6>
+
+                            <div class="d-flex align-items-center gap-3 text-muted small my-2" style="font-size: 0.8rem;">
+                                <span><i class="bi bi-clock me-1 text-primary"></i>@gig.DeliveryDays Days</span>
+                                <span><i class="bi bi-arrow-repeat me-1 text-success"></i>@gig.RevisionCount Revs</span>
+                            </div>
+
+                            <div class="pp-gig-footer">
+                                <span class="text-muted small">Starting at</span>
+                                <span class="pp-gig-price">₦@gig.Price.ToString("N0")</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- Dual CTA Banner (Hire or Sell) -->
+<section class="py-5 px-4 rounded-4 my-5" style="background: linear-gradient(135deg, #0A5C36, #074729); color: white;">
+    <div class="row align-items-center g-4 text-center text-md-start">
+        <div class="col-md-8">
+            <h2 class="brand-font text-white mb-2">Are you a Nigerian Tech Worker?</h2>
+            <p class="text-white-50 mb-0" style="font-size: 1.05rem;">
+                Offer your programming, design, and tech skills to clients across Nigeria and globally. Never worry about unpaid invoices with automated escrow protection.
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-controller="Gig" asp-action="Create" class="btn btn-light btn-lg px-4 py-2.5 fw-bold text-success shadow">
+                <i class="bi bi-rocket-takeoff me-1"></i> Post Your First Gig
+            </a>
+        </div>
+    </div>
+</section>
