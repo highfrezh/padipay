@@ -1,3 +1,85 @@
+/* ===== Design Tokens ===== */
+:root {
+  --pp-primary: #4f46e5;
+  --pp-primary-dark: #4338ca;
+  --pp-success: #10b981;
+  --pp-warning: #f59e0b;
+  --pp-danger: #ef4444;
+  --pp-bg: #f8fafc;
+  --pp-surface: #ffffff;
+  --pp-text: #1e293b;
+  --pp-text-muted: #64748b;
+  --pp-border: #e2e8f0;
+  --pp-radius: 12px;
+  --pp-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --pp-shadow-hover: 0 8px 24px rgba(0,0,0,0.08);
+  --pp-transition: all 0.2s ease;
+}
+
+body {
+  background-color: var(--pp-bg);
+  color: var(--pp-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ===== Cards ===== */
+.pp-card {
+  background: var(--pp-surface);
+  border: 1px solid var(--pp-border);
+  border-radius: var(--pp-radius);
+  padding: 1.5rem;
+  box-shadow: var(--pp-shadow);
+  transition: var(--pp-transition);
+}
+
+.pp-card:hover {
+  box-shadow: var(--pp-shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* ===== Buttons ===== */
+.btn-primary {
+  background-color: var(--pp-primary);
+  border-color: var(--pp-primary);
+  transition: var(--pp-transition);
+}
+
+.btn-primary:hover {
+  background-color: var(--pp-primary-dark);
+  border-color: var(--pp-primary-dark);
+  transform: translateY(-1px);
+}
+
+/* ===== Fade-in animation ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pp-fade-in {
+  animation: fadeInUp 0.4s ease both;
+}
+
+/* ===== Status badges ===== */
+.pp-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pp-badge-pending { background: #fef3c7; color: #92400e; }
+.pp-badge-funded { background: #dbeafe; color: #1e40af; }
+.pp-badge-delivered { background: #e0e7ff; color: #4338ca; }
+.pp-badge-released { background: #d1fae5; color: #065f46; }
+
 html {
   font-size: 14px;
 }
