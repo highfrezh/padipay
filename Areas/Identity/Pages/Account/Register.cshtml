@@ -1,64 +1,59 @@
-﻿@page
+@page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Join PadiPay";
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="pp-fade-in" style="max-width: 540px; margin: 2.5rem auto;">
+    <div class="pp-card p-4 p-md-5">
+        <div class="text-center mb-4">
+            <span class="pp-badge pp-badge-funded mb-2">🇳🇬 Nigeria's Tech Marketplace</span>
+            <h2 style="font-weight: 700; color: var(--pp-primary);">Create Your Account</h2>
+            <p style="color: var(--pp-text-muted); font-size: 0.95rem;">Join as a developer, designer, or hire top Nigerian tech talent with escrow protection.</p>
+        </div>
 
-<div class="row">
-    <div class="col-md-4">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Input.Email">Email</label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="Input.FullName" class="form-label" style="font-weight: 600;">Full Name</label>
+                <input asp-for="Input.FullName" class="form-control pp-input" placeholder="e.g. Babatunde Adeyemi" />
+                <span asp-validation-for="Input.FullName" class="text-danger small"></span>
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
+
+            <div class="mb-3">
+                <label asp-for="Input.Email" class="form-label" style="font-weight: 600;">Email Address</label>
+                <input asp-for="Input.Email" class="form-control pp-input" autocomplete="username" placeholder="name@example.com" />
+                <span asp-validation-for="Input.Email" class="text-danger small"></span>
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+
+            <div class="mb-3">
+                <label asp-for="Input.Location" class="form-label" style="font-weight: 600;">Location in Nigeria</label>
+                <input asp-for="Input.Location" class="form-control pp-input" placeholder="e.g. Lagos, Abuja, Port Harcourt, Ibadan" />
+                <span asp-validation-for="Input.Location" class="text-danger small"></span>
             </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+
+            <div class="mb-3">
+                <label asp-for="Input.Password" class="form-label" style="font-weight: 600;">Password</label>
+                <input asp-for="Input.Password" class="form-control pp-input" autocomplete="new-password" placeholder="At least 6 characters" />
+                <span asp-validation-for="Input.Password" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Input.ConfirmPassword" class="form-label" style="font-weight: 600;">Confirm Password</label>
+                <input asp-for="Input.ConfirmPassword" class="form-control pp-input" autocomplete="new-password" placeholder="Confirm your password" />
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <button id="registerSubmit" type="submit" class="btn btn-primary w-100 py-2 mb-3" style="font-weight: 600;">
+                Create Account & Wallet
+            </button>
+
+            <div class="text-center">
+                <span style="color: var(--pp-text-muted); font-size: 0.9rem;">Already have an account? </span>
+                <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" style="color: var(--pp-primary); font-weight: 600; text-decoration: none;">Sign In</a>
+            </div>
         </form>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
-            }
-        </section>
     </div>
 </div>
 
