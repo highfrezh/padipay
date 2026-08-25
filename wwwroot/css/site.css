@@ -389,6 +389,38 @@ main {
   background: var(--pp-dark);
   color: var(--pp-text-light);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 3rem 0 1.5rem;
-  margin-top: 4rem;
+  padding: 3.5rem 0 1.5rem;
+  margin-top: 5rem;
+}
+
+.pp-footer h4, .pp-footer h6 {
+  color: #FFFFFF;
+}
+
+.pp-footer-link {
+  color: #94A3B8;
+  text-decoration: none;
+  transition: var(--pp-transition);
+}
+
+.pp-footer-link:hover {
+  color: #00D084;
+  transform: translateX(2px);
+}
+
+.pp-footer-accent {
+  color: #00D084 !important;
+}
+
+.pp-footer-pill {
+  background: rgba(0, 208, 132, 0.12);
+  border: 1px solid rgba(0, 208, 132, 0.3);
+  color: #00D084;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--pp-radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }

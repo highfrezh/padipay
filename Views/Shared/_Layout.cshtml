@@ -112,34 +112,34 @@
             <div class="row g-4 pb-4 border-bottom border-secondary border-opacity-25">
                 <div class="col-lg-4 col-md-6">
                     <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="fs-4 text-success"><i class="bi bi-shield-lock-fill"></i></span>
+                        <span class="fs-4 pp-footer-accent"><i class="bi bi-shield-lock-fill"></i></span>
                         <h4 class="text-white mb-0 brand-font">PadiPay</h4>
                         <span class="pp-brand-badge">NG 🇳🇬</span>
                     </div>
                     <p class="text-muted small mb-3">
                         Nigeria's premier escrow-powered tech freelance marketplace. Safely hire developers, designers, DevOps engineers, and technical talent with complete financial peace of mind.
                     </p>
-                    <div class="pp-escrow-pill text-white border-secondary">
-                        <i class="bi bi-lock-fill text-success"></i> Secured by Automated Escrow
+                    <div class="pp-footer-pill">
+                        <i class="bi bi-lock-fill pp-footer-accent"></i> Secured by Automated Escrow
                     </div>
                 </div>
 
                 <div class="col-lg-2 col-md-6 col-6">
                     <h6 class="text-white mb-3">Categories</h6>
-                    <ul class="list-unstyled small d-flex flex-column gap-2 text-muted">
-                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="1" class="text-decoration-none text-muted">Web Development</a></li>
-                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="2" class="text-decoration-none text-muted">Mobile Apps</a></li>
-                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="3" class="text-decoration-none text-muted">UI/UX Design</a></li>
-                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="4" class="text-decoration-none text-muted">Cloud & DevOps</a></li>
+                    <ul class="list-unstyled small d-flex flex-column gap-2">
+                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="1" class="pp-footer-link">Web Development</a></li>
+                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="2" class="pp-footer-link">Mobile Apps</a></li>
+                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="3" class="pp-footer-link">UI/UX Design</a></li>
+                        <li><a asp-controller="Gig" asp-action="Index" asp-route-categoryId="4" class="pp-footer-link">Cloud & DevOps</a></li>
                     </ul>
                 </div>
 
                 <div class="col-lg-2 col-md-6 col-6">
                     <h6 class="text-white mb-3">Freelancers</h6>
-                    <ul class="list-unstyled small d-flex flex-column gap-2 text-muted">
-                        <li><a asp-controller="Gig" asp-action="Create" class="text-decoration-none text-muted">Become a Seller</a></li>
-                        <li><a asp-controller="Gig" asp-action="MyGigs" class="text-decoration-none text-muted">Manage Gigs</a></li>
-                        <li><a asp-controller="Wallet" asp-action="Index" class="text-decoration-none text-muted">Escrow Wallet</a></li>
+                    <ul class="list-unstyled small d-flex flex-column gap-2">
+                        <li><a asp-controller="Gig" asp-action="Create" class="pp-footer-link">Become a Seller</a></li>
+                        <li><a asp-controller="Gig" asp-action="MyGigs" class="pp-footer-link">Manage Gigs</a></li>
+                        <li><a asp-controller="Wallet" asp-action="Index" class="pp-footer-link">Escrow Wallet</a></li>
                     </ul>
                 </div>
 
@@ -149,7 +149,7 @@
                         PadiPay solves the trust deficit in remote tech hiring by locking funds until milestones are delivered.
                     </p>
                     <div class="d-flex align-items-center gap-2 text-muted small">
-                        <i class="bi bi-geo-alt-fill text-success"></i> Lagos, Abuja, Port Harcourt & Nationwide
+                        <i class="bi bi-geo-alt-fill pp-footer-accent"></i> Lagos, Abuja, Port Harcourt & Nationwide
                     </div>
                 </div>
             </div>
@@ -157,8 +157,8 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center pt-3 small text-muted">
                 <div>&copy; @DateTime.UtcNow.Year PadiPay Technologies. All rights reserved.</div>
                 <div class="d-flex gap-3 mt-2 mt-md-0">
-                    <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">Privacy Policy</a>
-                    <a href="#" class="text-decoration-none text-muted">Terms of Escrow</a>
+                    <a asp-controller="Home" asp-action="Privacy" class="pp-footer-link">Privacy Policy</a>
+                    <a href="#" class="pp-footer-link">Terms of Escrow</a>
                 </div>
             </div>
         </div>
