@@ -136,11 +136,11 @@
                             <!-- Seller Info -->
                             <div class="pp-gig-seller">
                                 <div class="pp-seller-avatar">
-                                    @(gig.Seller?.FullName?.Substring(0, 1).ToUpper() ?? "U")
+                                    @(string.IsNullOrWhiteSpace(gig.Seller?.FullName) ? "U" : gig.Seller.FullName.Trim()[0].ToString().ToUpper())
                                 </div>
                                 <div class="overflow-hidden">
                                     <div class="fw-bold text-dark small text-truncate">
-                                        @(gig.Seller?.FullName ?? "Tech Pro")
+                                        @(string.IsNullOrWhiteSpace(gig.Seller?.FullName) ? "Tech Pro" : gig.Seller.FullName)
                                     </div>
                                     <div class="text-muted small text-truncate" style="font-size: 0.75rem;">
                                         <i class="bi bi-geo-alt me-1"></i>@(gig.Seller?.Location ?? "Nigeria")

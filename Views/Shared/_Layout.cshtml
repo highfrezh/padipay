@@ -28,7 +28,7 @@
     <!-- Main Navigation Bar -->
     <header class="pp-navbar">
         <nav class="navbar navbar-expand-lg navbar-light py-2">
-            <div class="container-fluid px-lg-4">
+            <div class="container">
                 <!-- Brand Logo -->
                 <a class="pp-brand" asp-area="" asp-controller="Home" asp-action="Index">
                     <span class="text-success"><i class="bi bi-shield-lock-fill"></i></span>
@@ -85,7 +85,7 @@
     </header>
 
     <!-- Main Content Body -->
-    <main role="main" class="container-fluid px-lg-4 py-4">
+    <main role="main" class="container py-4">
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show pp-fade-in mb-4 d-flex align-items-center gap-2" role="alert">
@@ -108,7 +108,7 @@
 
     <!-- Modern Marketplace Footer -->
     <footer class="pp-footer">
-        <div class="container-fluid px-lg-4">
+        <div class="container">
             <div class="row g-4 pb-4 border-bottom border-secondary border-opacity-25">
                 <div class="col-lg-4 col-md-6">
                     <div class="d-flex align-items-center gap-2 mb-2">

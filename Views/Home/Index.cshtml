@@ -7,7 +7,7 @@
 <!-- Hero Section -->
 <section class="py-5 px-3 px-md-4 mb-5 rounded-4 position-relative overflow-hidden" 
          style="background: radial-gradient(circle at top right, rgba(0, 192, 118, 0.15), transparent 60%), radial-gradient(circle at bottom left, rgba(79, 70, 229, 0.1), transparent 50%), #0B0F19; color: white;">
-    <div class="container-fluid py-md-4 position-relative" style="z-index: 2;">
+    <div class="container py-md-4 position-relative" style="z-index: 2;">
         <div class="row align-items-center g-5">
             <div class="col-lg-7">
                 <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill mb-3" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.15);">
@@ -166,11 +166,11 @@
                         <div class="pp-gig-body">
                             <div class="pp-gig-seller">
                                 <div class="pp-seller-avatar">
-                                    @(gig.Seller?.FullName?.Substring(0, 1).ToUpper() ?? "U")
+                                    @(string.IsNullOrWhiteSpace(gig.Seller?.FullName) ? "U" : gig.Seller.FullName.Trim()[0].ToString().ToUpper())
                                 </div>
                                 <div class="overflow-hidden">
                                     <div class="fw-bold text-dark small text-truncate">
-                                        @(gig.Seller?.FullName ?? "Tech Pro")
+                                        @(string.IsNullOrWhiteSpace(gig.Seller?.FullName) ? "Tech Pro" : gig.Seller.FullName)
                                     </div>
                                     <div class="text-muted small text-truncate" style="font-size: 0.75rem;">
                                         <i class="bi bi-geo-alt me-1"></i>@(gig.Seller?.Location ?? "Nigeria")
