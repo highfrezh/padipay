@@ -23,18 +23,36 @@
             <h1 class="brand-font mb-3" style="font-size: 1.85rem; line-height: 1.35;">@Model.Title</h1>
 
             <!-- Seller Header Bar -->
-            <div class="d-flex align-items-center gap-3 p-3 mb-4 rounded-3 border bg-white shadow-xs">
-                <div class="pp-seller-avatar" style="width: 48px; height: 48px; font-size: 1.15rem;">
-                    @(string.IsNullOrWhiteSpace(Model.Seller?.FullName) ? "U" : Model.Seller.FullName.Trim()[0].ToString().ToUpper())
+            <div class="d-flex align-items-center justify-content-between p-3 mb-4 rounded-3 border bg-white shadow-xs">
+                <div class="d-flex align-items-center gap-3 overflow-hidden">
+                    <a asp-controller="Profile" asp-action="Details" asp-route-id="@Model.SellerId" class="text-decoration-none">
+                        @if (!string.IsNullOrEmpty(Model.Seller?.ProfilePictureUrl))
+                        {
+                            <img src="@Model.Seller.ProfilePictureUrl" alt="@Model.Seller?.FullName" class="rounded-circle border" style="width: 48px; height: 48px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="pp-seller-avatar" style="width: 48px; height: 48px; font-size: 1.15rem;">
+                                @(string.IsNullOrWhiteSpace(Model.Seller?.FullName) ? "U" : Model.Seller.FullName.Trim()[0].ToString().ToUpper())
+                            </div>
+                        }
+                    </a>
+                    <div class="overflow-hidden">
+                        <div class="d-flex align-items-center gap-2">
+                            <a asp-controller="Profile" asp-action="Details" asp-route-id="@Model.SellerId" class="text-decoration-none text-dark fw-bold">
+                                @(string.IsNullOrWhiteSpace(Model.Seller?.FullName) ? "Tech Professional" : Model.Seller.FullName)
+                            </a>
+                            <span class="pp-badge pp-badge-released small py-0.5"><i class="bi bi-patch-check-fill"></i> Verified</span>
+                        </div>
+                        <div class="text-muted small text-truncate">
+                            @(Model.Seller?.Headline ?? "Software Developer") &bull; <i class="bi bi-geo-alt"></i> @(Model.Seller?.Location ?? "Nigeria")
+                        </div>
+                    </div>
                 </div>
-                <div class="flex-grow-1 overflow-hidden">
-                    <div class="d-flex align-items-center gap-2">
-                        <h6 class="mb-0 fw-bold text-dark">@(string.IsNullOrWhiteSpace(Model.Seller?.FullName) ? "Tech Professional" : Model.Seller.FullName)</h6>
-                        <span class="pp-badge pp-badge-released small py-0.5"><i class="bi bi-patch-check-fill"></i> Verified Freelancer</span>
-                    </div>
-                    <div class="text-muted small text-truncate">
-                        @(Model.Seller?.Headline ?? "Software Developer") &bull; <i class="bi bi-geo-alt"></i> @(Model.Seller?.Location ?? "Nigeria")
-                    </div>
+                <div class="ms-3 flex-shrink-0">
+                    <a asp-controller="Profile" asp-action="Details" asp-route-id="@Model.SellerId" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        View Profile
+                    </a>
                 </div>
             </div>
 

@@ -1,0 +1,127 @@
+@model PadiPay.ViewModels.EditProfileViewModel
+@{
+    ViewData["Title"] = "Edit Profile - PadiPay";
+    var initials = string.IsNullOrWhiteSpace(Model.FullName)
+        ? "U"
+        : string.Join("", Model.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(s => s[0].ToString().ToUpper()));
+}
+
+<div class="pp-fade-in pb-5" style="max-width: 800px; margin: 0 auto;">
+    <!-- Breadcrumb & Header -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none text-muted">My Profile</a></li>
+                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Edit Profile</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold text-dark mb-1">Edit Professional Profile</h2>
+        <p class="text-muted small mb-0">Highlight your expertise, tech stack, and location to attract clients on PadiPay.</p>
+    </div>
+
+    <!-- Edit Form Card -->
+    <div class="pp-card p-4 p-md-5 shadow-sm border-0">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+            <!-- Avatar Upload Section -->
+            <div class="mb-4 p-3 rounded-3 bg-light border">
+                <label class="form-label fw-bold text-dark d-block mb-3">Profile Photo</label>
+                <div class="d-flex align-items-center gap-4">
+                    <div class="position-relative">
+                        <img id="avatarPreview" 
+                             src="@(string.IsNullOrEmpty(Model.CurrentProfilePictureUrl) ? "" : Model.CurrentProfilePictureUrl)" 
+                             alt="Avatar Preview" 
+                             class="rounded-circle shadow-sm border border-2 border-white @(string.IsNullOrEmpty(Model.CurrentProfilePictureUrl) ? "d-none" : "")" 
+                             style="width: 90px; height: 90px; object-fit: cover;" />
+
+                        <div id="avatarFallback" 
+                             class="rounded-circle d-flex align-items-center justify-content-center shadow-sm border border-2 border-white fw-bold text-white @(!string.IsNullOrEmpty(Model.CurrentProfilePictureUrl) ? "d-none" : "")" 
+                             style="width: 90px; height: 90px; font-size: 1.8rem; background: linear-gradient(135deg, var(--pp-primary), #00C076);">
+                            @initials
+                        </div>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <input asp-for="ProfilePicture" type="file" class="form-control pp-input mb-1" id="avatarInput" accept=".jpg,.jpeg,.png,.webp" />
+                        <div class="form-text small text-muted">
+                            Recommended: Square image (.jpg, .png, .webp). Maximum size: 3MB.
+                        </div>
+                        <span asp-validation-for="ProfilePicture" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Info Grid -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="FullName" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="FullName" class="form-control pp-input" placeholder="e.g. Babatunde Adeyemi" />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Location" class="form-label fw-semibold text-dark"></label>
+                    <input asp-for="Location" class="form-control pp-input" placeholder="e.g. Lagos, Abuja, Port Harcourt, Enugu" />
+                    <div class="form-text small text-muted">Your city/state in Nigeria.</div>
+                    <span asp-validation-for="Location" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <!-- Headline -->
+            <div class="mb-3">
+                <label asp-for="Headline" class="form-label fw-semibold text-dark"></label>
+                <input asp-for="Headline" class="form-control pp-input" placeholder="e.g. Senior Full-Stack .NET & React Engineer | Cloud Architect" />
+                <div class="form-text small text-muted">A concise one-line summary of what you do.</div>
+                <span asp-validation-for="Headline" class="text-danger small"></span>
+            </div>
+
+            <!-- Skills & Tech Stack -->
+            <div class="mb-3">
+                <label asp-for="Skills" class="form-label fw-semibold text-dark"></label>
+                <input asp-for="Skills" class="form-control pp-input" placeholder="e.g. C#, ASP.NET Core, SQL Server, Docker, Azure, React, TypeScript" />
+                <div class="form-text small text-muted">Separate technologies with commas. These appear as badges on your profile.</div>
+                <span asp-validation-for="Skills" class="text-danger small"></span>
+            </div>
+
+            <!-- Bio -->
+            <div class="mb-4">
+                <label asp-for="Bio" class="form-label fw-semibold text-dark"></label>
+                <textarea asp-for="Bio" rows="6" class="form-control pp-input" placeholder="Introduce yourself, your experience, noteworthy projects, and what makes your tech services unique..."></textarea>
+                <div class="form-text small text-muted">Tell potential clients about your background, tools, and work ethic.</div>
+                <span asp-validation-for="Bio" class="text-danger small"></span>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold shadow-sm">
+                    <i class="bi bi-check2-circle me-1"></i> Save Profile Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('avatarInput')?.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const img = document.getElementById('avatarPreview');
+                    const fallback = document.getElementById('avatarFallback');
+                    img.src = event.target.result;
+                    img.classList.remove('d-none');
+                    if (fallback) fallback.classList.add('d-none');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}

@@ -1,0 +1,242 @@
+@model PadiPay.ViewModels.UserProfileViewModel
+@{
+    ViewData["Title"] = $"{Model.User.FullName} - Tech Profile";
+    var initials = string.IsNullOrWhiteSpace(Model.User.FullName) 
+        ? "U" 
+        : string.Join("", Model.User.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(s => s[0].ToString().ToUpper()));
+}
+
+<div class="pp-fade-in pb-5">
+    <!-- Breadcrumb & Back Navigation -->
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Gig" asp-action="Index" class="text-decoration-none text-muted">Explore</a></li>
+                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">@Model.User.FullName</li>
+            </ol>
+        </nav>
+        @if (Model.IsOwner)
+        {
+            <a asp-action="Edit" class="btn btn-outline-primary btn-sm px-3 rounded-pill">
+                <i class="bi bi-pencil-fill me-1"></i> Edit Profile
+            </a>
+        }
+    </div>
+
+    <!-- Profile Hero Card -->
+    <div class="pp-card p-4 p-md-5 mb-4 shadow-sm border-0 position-relative overflow-hidden" 
+         style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(243, 244, 246, 0.8)); border-left: 6px solid var(--pp-primary) !important;">
+        <div class="row align-items-center g-4">
+            <!-- Avatar Column -->
+            <div class="col-auto">
+                @if (!string.IsNullOrEmpty(Model.User.ProfilePictureUrl))
+                {
+                    <img src="@Model.User.ProfilePictureUrl" 
+                         alt="@Model.User.FullName" 
+                         class="rounded-circle shadow-sm border border-3 border-white" 
+                         style="width: 110px; height: 110px; object-fit: cover;" />
+                }
+                else
+                {
+                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm border border-3 border-white fw-bold text-white" 
+                         style="width: 110px; height: 110px; font-size: 2.2rem; background: linear-gradient(135deg, var(--pp-primary), #00C076);">
+                        @initials
+                    </div>
+                }
+            </div>
+
+            <!-- Profile Info Column -->
+            <div class="col">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                    <h2 class="fw-bold mb-0 text-dark">@Model.User.FullName</h2>
+                    <span class="pp-badge pp-badge-released small py-1 px-2.5">
+                        <i class="bi bi-patch-check-fill me-1"></i> Verified Freelancer
+                    </span>
+                    @if (Model.IsOwner)
+                    {
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border px-2 py-1 small">You</span>
+                    }
+                </div>
+                
+                <h5 class="text-muted fw-medium mb-3" style="font-size: 1.05rem;">
+                    @(string.IsNullOrWhiteSpace(Model.User.Headline) ? "Tech Freelancer" : Model.User.Headline)
+                </h5>
+
+                <div class="d-flex flex-wrap gap-3 text-muted small">
+                    <div>
+                        <i class="bi bi-geo-alt text-primary me-1"></i>
+                        <span>@(string.IsNullOrWhiteSpace(Model.User.Location) ? "Nigeria" : Model.User.Location)</span>
+                    </div>
+                    <div>
+                        <i class="bi bi-calendar-check text-success me-1"></i>
+                        <span>Member since @Model.User.JoinedAt.ToString("MMMM yyyy")</span>
+                    </div>
+                    <div>
+                        <i class="bi bi-briefcase text-info me-1"></i>
+                        <span>@Model.ActiveGigs.Count Active Service@(Model.ActiveGigs.Count == 1 ? "" : "s")</span>
+                    </div>
+                    <div>
+                        <i class="bi bi-shield-lock-fill text-emerald me-1"></i>
+                        <span class="text-success fw-semibold">Escrow Protected</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons Column -->
+            @if (Model.IsOwner)
+            {
+                <div class="col-md-auto d-flex flex-md-column gap-2">
+                    <a asp-action="Edit" class="btn btn-primary px-4 py-2 fw-semibold">
+                        <i class="bi bi-gear-fill me-1"></i> Profile Settings
+                    </a>
+                    <a asp-controller="Gig" asp-action="Create" class="btn btn-outline-success px-4 py-2 fw-semibold">
+                        <i class="bi bi-plus-circle me-1"></i> Post New Gig
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Bio & Skills Grid -->
+    <div class="row g-4 mb-5">
+        <!-- Left: About / Bio -->
+        <div class="col-lg-8">
+            <div class="pp-card p-4 h-100 shadow-sm">
+                <h5 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-person-lines-fill text-primary"></i> About Freelancer
+                </h5>
+                @if (!string.IsNullOrWhiteSpace(Model.User.Bio))
+                {
+                    <div class="text-secondary" style="white-space: pre-line; line-height: 1.7; font-size: 0.98rem;">
+                        @Model.User.Bio
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted p-4 text-center rounded-3 bg-light border border-dashed">
+                        <i class="bi bi-chat-left-quote fs-3 d-block mb-2 text-muted opacity-50"></i>
+                        <p class="mb-2">No detailed bio provided yet.</p>
+                        @if (Model.IsOwner)
+                        {
+                            <a asp-action="Edit" class="btn btn-sm btn-primary">Add your bio</a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Right: Skills & Tech Stack -->
+        <div class="col-lg-4">
+            <div class="pp-card p-4 h-100 shadow-sm">
+                <h5 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-code-slash text-success"></i> Skills & Tech Stack
+                </h5>
+                @if (Model.ParsedSkills.Any())
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var skill in Model.ParsedSkills)
+                        {
+                            <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-xs" style="font-size: 0.85rem; font-weight: 500;">
+                                <span class="text-success me-1">#</span>@skill
+                            </span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted p-4 text-center rounded-3 bg-light border border-dashed">
+                        <i class="bi bi-tools fs-3 d-block mb-2 text-muted opacity-50"></i>
+                        <p class="mb-2">No skills listed yet.</p>
+                        @if (Model.IsOwner)
+                        {
+                            <a asp-action="Edit" class="btn btn-sm btn-outline-primary">Add your skills</a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Gigs Section -->
+    <div class="mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">
+                    Services by @Model.User.FullName
+                </h3>
+                <p class="text-muted small mb-0">Book directly with 100% PadiPay escrow payment security.</p>
+            </div>
+            @if (Model.IsOwner)
+            {
+                <a asp-controller="Gig" asp-action="MyGigs" class="btn btn-outline-secondary btn-sm">
+                    Manage All Gigs (@Model.ActiveGigs.Count)
+                </a>
+            }
+        </div>
+
+        @if (Model.ActiveGigs.Any())
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                @foreach (var gig in Model.ActiveGigs)
+                {
+                    <div class="col">
+                        <div class="pp-gig-card position-relative">
+                            <!-- Cover Image -->
+                            <div class="pp-gig-img-wrap">
+                                @if (!string.IsNullOrEmpty(gig.CoverImageUrl))
+                                {
+                                    <img src="@gig.CoverImageUrl" alt="@gig.Title" class="pp-gig-img" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center text-white-50">
+                                        <i class="bi bi-briefcase fs-1"></i>
+                                    </div>
+                                }
+                                <span class="pp-gig-category-badge">
+                                    @(gig.Category?.Name ?? "General")
+                                </span>
+                            </div>
+
+                            <!-- Card Body -->
+                            <div class="pp-gig-body">
+                                <h6 class="pp-gig-title">
+                                    <a asp-controller="Gig" asp-action="Details" asp-route-id="@gig.Id" class="stretched-link text-decoration-none text-dark">
+                                        @gig.Title
+                                    </a>
+                                </h6>
+
+                                <div class="d-flex align-items-center gap-3 text-muted small my-2" style="font-size: 0.8rem;">
+                                    <span><i class="bi bi-clock me-1 text-primary"></i>@gig.DeliveryDays Days</span>
+                                    <span><i class="bi bi-arrow-repeat me-1 text-success"></i>@gig.RevisionCount Revs</span>
+                                </div>
+
+                                <div class="pp-gig-footer">
+                                    <span class="text-muted small">Starting at</span>
+                                    <span class="pp-gig-price">₦@gig.Price.ToString("N0")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="pp-card p-5 text-center shadow-sm">
+                <div class="mb-3 text-muted">
+                    <i class="bi bi-folder2-open" style="font-size: 3rem;"></i>
+                </div>
+                <h5 class="fw-bold text-dark">No active gigs listed yet</h5>
+                <p class="text-muted small mb-3">This professional has not published any active gigs at the moment.</p>
+                @if (Model.IsOwner)
+                {
+                    <a asp-controller="Gig" asp-action="Create" class="btn btn-primary px-4 py-2">
+                        <i class="bi bi-plus-circle me-1"></i> Post Your First Gig
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>

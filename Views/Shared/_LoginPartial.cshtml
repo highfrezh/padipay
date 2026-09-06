@@ -4,26 +4,82 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-<ul class="navbar-nav align-items-center gap-1">
+<ul class="navbar-nav align-items-center gap-2">
 @if (SignInManager.IsSignedIn(User))
 {
+    var currentUser = await UserManager.GetUserAsync(User);
+    var displayName = !string.IsNullOrWhiteSpace(currentUser?.FullName) 
+        ? currentUser.FullName 
+        : (User.Identity?.Name?.Split('@')[0] ?? "Account");
+    var initial = !string.IsNullOrWhiteSpace(currentUser?.FullName) 
+        ? currentUser.FullName.Trim()[0].ToString().ToUpper() 
+        : (User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U");
+
     @if (User.IsInRole("Admin"))
     {
         <li class="nav-item">
-            <a class="nav-link pp-badge pp-badge-delivered text-decoration-none px-2 py-1 me-2" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+            <a class="nav-link pp-badge pp-badge-delivered text-decoration-none px-2.5 py-1" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
                 🛡️ Admin Portal
             </a>
         </li>
     }
-    <li class="nav-item">
-        <a class="nav-link fw-semibold text-dark" asp-area="" asp-controller="Wallet" asp-action="Index" title="My Account">
-            👤 @(User.Identity?.Name?.Split('@')[0] ?? "Account")
+
+    <!-- User Account Dropdown -->
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 py-1 px-2 rounded-3 text-dark fw-semibold" 
+           href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            @if (!string.IsNullOrEmpty(currentUser?.ProfilePictureUrl))
+            {
+                <img src="@currentUser.ProfilePictureUrl" alt="@displayName" class="rounded-circle border" style="width: 32px; height: 32px; object-fit: cover;" />
+            }
+            else
+            {
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" 
+                     style="width: 32px; height: 32px; font-size: 0.85rem; background: linear-gradient(135deg, var(--pp-primary), #00C076);">
+                    @initial
+                </div>
+            }
+            <span class="d-none d-md-inline small">@displayName</span>
         </a>
-    </li>
-    <li class="nav-item">
-        <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button id="logout" type="submit" class="btn btn-outline-secondary btn-sm px-3 py-1">Logout</button>
-        </form>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2 mt-2" aria-labelledby="userAccountDropdown" style="min-width: 220px; border-radius: 0.75rem;">
+            <li class="px-3 py-2 border-bottom mb-1">
+                <div class="fw-bold text-dark text-truncate">@displayName</div>
+                <div class="text-muted small text-truncate" style="font-size: 0.75rem;">@(currentUser?.Email ?? User.Identity?.Name)</div>
+            </li>
+            <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2 small" asp-area="" asp-controller="Profile" asp-action="Index">
+                    <i class="bi bi-person text-primary"></i> View Public Profile
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2 small" asp-area="" asp-controller="Profile" asp-action="Edit">
+                    <i class="bi bi-pencil-square text-success"></i> Edit Profile & Skills
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2 small" asp-area="" asp-controller="Gig" asp-action="MyGigs">
+                    <i class="bi bi-briefcase text-secondary"></i> My Gigs
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2 small" asp-area="" asp-controller="Wallet" asp-action="Index">
+                    <i class="bi bi-wallet2 text-info"></i> My Wallet
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2 small" asp-area="" asp-controller="Transaction" asp-action="Index">
+                    <i class="bi bi-arrow-left-right text-warning"></i> Escrow Orders
+                </a>
+            </li>
+            <li><hr class="dropdown-divider my-1"></li>
+            <li>
+                <form id="logoutForm" class="d-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                    <button id="logout" type="submit" class="dropdown-item d-flex align-items-center gap-2 py-2 small text-danger">
+                        <i class="bi bi-box-arrow-right"></i> Sign Out
+                    </button>
+                </form>
+            </li>
+        </ul>
     </li>
 }
 else

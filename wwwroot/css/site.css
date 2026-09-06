@@ -164,12 +164,17 @@ main {
   transition: var(--pp-transition);
   text-decoration: none !important;
   color: inherit;
+  cursor: pointer;
 }
 
 .pp-gig-card:hover {
   border-color: #CBD5E1;
   box-shadow: var(--pp-shadow-hover);
   transform: translateY(-5px);
+}
+
+.pp-gig-card:hover .pp-gig-title a {
+  color: var(--pp-primary) !important;
 }
 
 .pp-gig-img-wrap {

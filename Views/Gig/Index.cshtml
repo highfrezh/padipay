@@ -61,7 +61,7 @@
     <div class="mb-4 d-flex align-items-center gap-2 overflow-auto pb-2" style="scrollbar-width: thin;">
         <a asp-action="Index" asp-route-search="@currentSearch" asp-route-sort="@currentSort" 
            class="btn btn-sm rounded-pill px-3 fw-bold @(!currentCat.HasValue ? "btn-dark" : "btn-outline-secondary")">
-            All Categories
+            All
         </a>
         @foreach (var cat in categories)
         {
@@ -115,7 +115,7 @@
             @foreach (var gig in Model)
             {
                 <div class="col-xl-3 col-lg-4 col-md-6">
-                    <a asp-action="Details" asp-route-id="@gig.Id" class="pp-gig-card">
+                    <div class="pp-gig-card position-relative">
                         <!-- Cover Image -->
                         <div class="pp-gig-img-wrap">
                             @if (!string.IsNullOrEmpty(gig.CoverImageUrl))
@@ -134,14 +134,23 @@
                         <!-- Card Body -->
                         <div class="pp-gig-body">
                             <!-- Seller Info -->
-                            <div class="pp-gig-seller">
-                                <div class="pp-seller-avatar">
-                                    @(string.IsNullOrWhiteSpace(gig.Seller?.FullName) ? "U" : gig.Seller.FullName.Trim()[0].ToString().ToUpper())
-                                </div>
+                            <div class="pp-gig-seller position-relative" style="z-index: 2;">
+                                <a asp-controller="Profile" asp-action="Details" asp-route-id="@gig.SellerId" class="text-decoration-none">
+                                    @if (!string.IsNullOrEmpty(gig.Seller?.ProfilePictureUrl))
+                                    {
+                                        <img src="@gig.Seller.ProfilePictureUrl" alt="@gig.Seller?.FullName" class="rounded-circle border" style="width: 36px; height: 36px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="pp-seller-avatar">
+                                            @(string.IsNullOrWhiteSpace(gig.Seller?.FullName) ? "U" : gig.Seller.FullName.Trim()[0].ToString().ToUpper())
+                                        </div>
+                                    }
+                                </a>
                                 <div class="overflow-hidden">
-                                    <div class="fw-bold text-dark small text-truncate">
+                                    <a asp-controller="Profile" asp-action="Details" asp-route-id="@gig.SellerId" class="text-decoration-none fw-bold text-dark small text-truncate d-block">
                                         @(string.IsNullOrWhiteSpace(gig.Seller?.FullName) ? "Tech Pro" : gig.Seller.FullName)
-                                    </div>
+                                    </a>
                                     <div class="text-muted small text-truncate" style="font-size: 0.75rem;">
                                         <i class="bi bi-geo-alt me-1"></i>@(gig.Seller?.Location ?? "Nigeria")
                                     </div>
@@ -150,7 +159,9 @@
 
                             <!-- Gig Title -->
                             <h6 class="pp-gig-title">
-                                @gig.Title
+                                <a asp-action="Details" asp-route-id="@gig.Id" class="stretched-link text-decoration-none text-dark">
+                                    @gig.Title
+                                </a>
                             </h6>
 
                             <!-- Turnaround & Rating preview -->
@@ -165,7 +176,7 @@
                                 <span class="pp-gig-price">₦@gig.Price.ToString("N0")</span>
                             </div>
                         </div>
-                    </a>
+                    </div>
                 </div>
             }
         </div>
