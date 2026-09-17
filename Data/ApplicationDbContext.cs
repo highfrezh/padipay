@@ -15,6 +15,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Gig> Gigs { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderDelivery> OrderDeliveries { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -27,6 +29,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<Gig>()
             .Property(g => g.Price)
+            .HasColumnType("decimal(18,2)");
+
+        builder.Entity<Order>()
+            .Property(o => o.Amount)
             .HasColumnType("decimal(18,2)");
 
         // One-to-One: ApplicationUser - Wallet
@@ -49,5 +55,33 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(c => c.Gigs)
             .HasForeignKey(g => g.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // One-to-Many: ApplicationUser (Buyer) - Orders
+        builder.Entity<Order>()
+            .HasOne(o => o.Buyer)
+            .WithMany()
+            .HasForeignKey(o => o.BuyerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // One-to-Many: ApplicationUser (Seller) - Orders
+        builder.Entity<Order>()
+            .HasOne(o => o.Seller)
+            .WithMany()
+            .HasForeignKey(o => o.SellerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // One-to-Many: Gig - Orders
+        builder.Entity<Order>()
+            .HasOne(o => o.Gig)
+            .WithMany()
+            .HasForeignKey(o => o.GigId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // One-to-Many: Order - Deliveries
+        builder.Entity<OrderDelivery>()
+            .HasOne(d => d.Order)
+            .WithMany(o => o.Deliveries)
+            .HasForeignKey(d => d.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

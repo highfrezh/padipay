@@ -1,0 +1,179 @@
+@model PadiPay.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = $"Checkout - {Model.Gig?.Title}";
+    var sellerInitial = string.IsNullOrWhiteSpace(Model.Gig?.Seller?.FullName)
+        ? "U"
+        : Model.Gig.Seller.FullName.Trim()[0].ToString().ToUpper();
+}
+
+<div class="pp-fade-in pb-5">
+    <!-- Breadcrumb -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Gig" asp-action="Index" class="text-decoration-none text-muted">Explore Gigs</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Gig" asp-action="Details" asp-route-id="@Model.GigId" class="text-decoration-none text-muted text-truncate" style="max-width: 250px;">@Model.Gig?.Title</a></li>
+                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Checkout & Escrow</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold text-dark mb-1">Review Order & Fund Escrow</h2>
+        <p class="text-muted small mb-0">Your payment is protected by PadiPay Escrow until you inspect and approve the completed work.</p>
+    </div>
+
+    <form asp-action="PlaceOrder" method="post">
+        <input type="hidden" asp-for="GigId" />
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+        <div class="row g-4">
+            <!-- Left Column: Gig Details & Requirements Input -->
+            <div class="col-lg-7">
+                <!-- Gig Summary Card -->
+                <div class="pp-card p-4 mb-4 shadow-sm">
+                    <span class="pp-badge pp-badge-funded small mb-2">Selected Tech Service</span>
+                    <h4 class="fw-bold text-dark mb-3">@Model.Gig?.Title</h4>
+
+                    <!-- Seller Bar -->
+                    <div class="d-flex align-items-center gap-3 p-3 rounded-3 bg-light mb-3">
+                        @if (!string.IsNullOrEmpty(Model.Gig?.Seller?.ProfilePictureUrl))
+                        {
+                            <img src="@Model.Gig.Seller.ProfilePictureUrl" alt="@Model.Gig.Seller.FullName" class="rounded-circle border" style="width: 44px; height: 44px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="pp-seller-avatar" style="width: 44px; height: 44px; font-size: 1.1rem;">
+                                @sellerInitial
+                            </div>
+                        }
+                        <div>
+                            <div class="fw-bold text-dark">@(Model.Gig?.Seller?.FullName ?? "Tech Professional")</div>
+                            <div class="text-muted small">
+                                @(Model.Gig?.Seller?.Headline ?? "Verified Freelancer") &bull; <i class="bi bi-geo-alt"></i> @(Model.Gig?.Seller?.Location ?? "Nigeria")
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Package Features -->
+                    <div class="row g-3 py-2 border-top border-bottom text-muted small">
+                        <div class="col-6">
+                            <i class="bi bi-clock-history text-primary me-2"></i>
+                            <strong>@Model.Gig?.DeliveryDays Days</strong> Turnaround
+                        </div>
+                        <div class="col-6">
+                            <i class="bi bi-arrow-repeat text-success me-2"></i>
+                            <strong>@Model.Gig?.RevisionCount Revisions</strong> Included
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requirements Submission Box -->
+                <div class="pp-card p-4 shadow-sm">
+                    <h5 class="fw-bold text-dark mb-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-code text-primary"></i> Project Requirements
+                    </h5>
+                    <p class="text-muted small mb-3">
+                        Provide clear specifications for <strong>@(Model.Gig?.Seller?.FullName ?? "the freelancer")</strong>. 
+                        Include links to repositories, Figma boards, design documents, API specifications, or instructions.
+                    </p>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Gig?.Requirements))
+                    {
+                        <div class="alert alert-info small py-2 px-3 mb-3">
+                            <strong><i class="bi bi-info-circle me-1"></i> Freelancer's Requested Information:</strong>
+                            <div class="mt-1" style="white-space: pre-line;">@Model.Gig.Requirements</div>
+                        </div>
+                    }
+
+                    <div class="mb-2">
+                        <textarea asp-for="Requirements" rows="7" class="form-control pp-input" 
+                                  placeholder="e.g. Please build the authentication endpoints using ASP.NET Core Identity. Repository is at: https://github.com/... Database schema: ... Deliverable deadline: ..."></textarea>
+                        <span asp-validation-for="Requirements" class="text-danger small"></span>
+                    </div>
+                    <div class="form-text small text-muted">Minimum 15 characters. Be as thorough as possible to avoid delivery delays.</div>
+                </div>
+            </div>
+
+            <!-- Right Column: Escrow Checkout Summary -->
+            <div class="col-lg-5">
+                <div class="position-sticky" style="top: 85px;">
+                    <div class="pp-card p-4 shadow-sm border-2">
+                        <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">
+                            Escrow Summary
+                        </h5>
+
+                        <div class="d-flex justify-content-between py-2 text-muted">
+                            <span>Service Price:</span>
+                            <span class="text-dark fw-semibold">₦@Model.Gig?.Price.ToString("N0")</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 text-muted">
+                            <span>PadiPay Escrow Fee:</span>
+                            <span class="text-success fw-bold">FREE (₦0)</span>
+                        </div>
+                        <hr class="my-2" />
+                        <div class="d-flex justify-content-between py-2 mb-3">
+                            <span class="fw-bold text-dark fs-5">Total to Escrow:</span>
+                            <span class="brand-font fs-3 fw-bold text-success">₦@Model.Gig?.Price.ToString("N0")</span>
+                        </div>
+
+                        <!-- Wallet Balance Card -->
+                        <div class="p-3 rounded-3 mb-4 @(Model.HasSufficientBalance ? "bg-light border" : "bg-warning bg-opacity-10 border border-warning")">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="small text-muted fw-medium">Your Wallet Balance:</span>
+                                <span class="fw-bold text-dark">₦@Model.WalletBalance.ToString("N0")</span>
+                            </div>
+
+                            @if (Model.HasSufficientBalance)
+                            {
+                                <div class="d-flex justify-content-between align-items-center small text-success">
+                                    <span>Balance after order:</span>
+                                    <span class="fw-semibold">₦@((Model.WalletBalance - (Model.Gig?.Price ?? 0)).ToString("N0"))</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="small text-danger fw-semibold mt-1">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Short by ₦@Model.ShortfallAmount.ToString("N0")
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Action Button -->
+                        @if (Model.HasSufficientBalance)
+                        {
+                            <button type="submit" class="btn btn-emerald w-100 py-3 fs-6 shadow-sm mb-3">
+                                <i class="bi bi-shield-lock-fill me-1"></i> Lock Funds & Place Order (₦@Model.Gig?.Price.ToString("N0"))
+                            </button>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning small mb-3">
+                                You need to fund your wallet with at least <strong>₦@Model.ShortfallAmount.ToString("N0")</strong> to complete this escrow order.
+                            </div>
+                            <a asp-controller="Wallet" asp-action="Fund" class="btn btn-warning w-100 py-2.5 fw-bold shadow-sm mb-3">
+                                <i class="bi bi-wallet-fill me-1"></i> Top Up Wallet Now
+                            </a>
+                        }
+
+                        <!-- Escrow Guarantee Trust Banner -->
+                        <div class="p-3 rounded-3 bg-light border small text-muted">
+                            <div class="d-flex align-items-center gap-2 mb-2 text-dark fw-bold">
+                                <i class="bi bi-shield-check text-success fs-5"></i>
+                                <span>PadiPay Buyer Protection</span>
+                            </div>
+                            <ul class="list-unstyled mb-0 d-flex flex-column gap-1.5" style="font-size: 0.82rem;">
+                                <li><i class="bi bi-check2 text-success me-1"></i> Money stays locked in escrow while freelancer works.</li>
+                                <li><i class="bi bi-check2 text-success me-1"></i> Inspect code, demo, and deliverables before approving.</li>
+                                <li><i class="bi bi-check2 text-success me-1"></i> Request up to @Model.Gig?.RevisionCount revisions if needed.</li>
+                                <li><i class="bi bi-check2 text-success me-1"></i> 100% money-back dispute protection by platform admins.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
