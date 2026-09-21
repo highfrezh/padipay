@@ -48,4 +48,7 @@ public class Order
 
     // Deliverables history (supports re-deliveries after revisions)
     public virtual ICollection<OrderDelivery> Deliveries { get; set; } = new List<OrderDelivery>();
+
+    // Client review for completed orders (1-to-1)
+    public virtual Review? Review { get; set; }
 }

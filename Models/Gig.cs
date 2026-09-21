@@ -45,4 +45,7 @@ public class Gig
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+
+    // Client reviews for this gig
+    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 }

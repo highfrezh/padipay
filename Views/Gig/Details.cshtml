@@ -46,6 +46,11 @@
                         </div>
                         <div class="text-muted small text-truncate">
                             @(Model.Seller?.Headline ?? "Software Developer") &bull; <i class="bi bi-geo-alt"></i> @(Model.Seller?.Location ?? "Nigeria")
+                            @if (Model.Reviews.Any())
+                            {
+                                <span class="ms-1 text-warning fw-bold"><i class="bi bi-star-fill"></i> @Math.Round(Model.Reviews.Average(r => r.Rating), 1).ToString("F1")</span>
+                                <span class="text-muted">(@Model.Reviews.Count)</span>
+                            }
                         </div>
                     </div>
                 </div>
@@ -104,6 +109,102 @@
                     </div>
                 </div>
             }
+
+            <!-- Client Reviews & Ratings Section -->
+            @{
+                var reviews = Model.Reviews.ToList();
+                var reviewCount = reviews.Count;
+                var avgRating = reviewCount > 0 ? Math.Round(reviews.Average(r => r.Rating), 1) : 5.0;
+            }
+            <div class="pp-card p-4 mb-4 shadow-sm" id="reviews-section">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom gap-2">
+                    <div>
+                        <h4 class="brand-font mb-1 text-dark">Client Reviews</h4>
+                        <p class="text-muted small mb-0">Verified feedback from clients who ordered this gig</p>
+                    </div>
+                    @if (reviewCount > 0)
+                    {
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fs-4 fw-bold text-dark">@avgRating.ToString("F1")</span>
+                            <div>
+                                <div class="text-warning fs-6">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= (int)Math.Round(avgRating))
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star"></i>
+                                        }
+                                    }
+                                </div>
+                                <div class="text-muted" style="font-size: 0.75rem;">@reviewCount @(reviewCount == 1 ? "review" : "reviews")</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (reviewCount > 0)
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var rev in reviews)
+                        {
+                            <div class="p-3 rounded-3 bg-light bg-opacity-50 border">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        @if (!string.IsNullOrEmpty(rev.Buyer?.ProfilePictureUrl))
+                                        {
+                                            <img src="@rev.Buyer.ProfilePictureUrl" alt="@rev.Buyer.FullName" class="rounded-circle border" style="width: 38px; height: 38px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="pp-seller-avatar" style="width: 38px; height: 38px; font-size: 0.95rem; background: linear-gradient(135deg, #4f46e5, #00C076);">
+                                                @(string.IsNullOrWhiteSpace(rev.Buyer?.FullName) ? "C" : rev.Buyer.FullName.Trim()[0].ToString().ToUpper())
+                                            </div>
+                                        }
+                                        <div>
+                                            <div class="fw-bold text-dark small d-flex align-items-center gap-1.5">
+                                                @(string.IsNullOrWhiteSpace(rev.Buyer?.FullName) ? "Verified Buyer" : rev.Buyer.FullName)
+                                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-0.5 px-1.5" style="font-size: 0.65rem;">
+                                                    <i class="bi bi-patch-check-fill"></i> Verified
+                                                </span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.72rem;">@(rev.Buyer?.Location ?? "Nigeria")</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-warning small">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= rev.Rating)
+                                                {
+                                                    <i class="bi bi-star-fill"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-star"></i>
+                                                }
+                                            }
+                                        </div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">@rev.CreatedAt.ToString("MMM dd, yyyy")</div>
+                                    </div>
+                                </div>
+                                <p class="text-secondary small mb-0 ps-1" style="white-space: pre-line; line-height: 1.6;">@rev.Comment</p>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-chat-square-heart display-6 text-muted opacity-50 mb-2 d-block"></i>
+                        <h6 class="fw-bold text-dark mb-1">No reviews yet</h6>
+                        <p class="small text-muted mb-0">Be among the first clients to hire this tech professional with 100% escrow protection!</p>
+                    </div>
+                }
+            </div>
         </div>
 
         <!-- Right Column: Sticky Order & Escrow Card -->

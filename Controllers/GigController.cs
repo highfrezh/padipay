@@ -34,6 +34,7 @@ public class GigController : Controller
         var query = _context.Gigs
             .Include(g => g.Category)
             .Include(g => g.Seller)
+            .Include(g => g.Reviews)
             .Where(g => g.IsActive);
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -73,6 +74,8 @@ public class GigController : Controller
         var gig = await _context.Gigs
             .Include(g => g.Category)
             .Include(g => g.Seller)
+            .Include(g => g.Reviews.OrderByDescending(r => r.CreatedAt))
+                .ThenInclude(r => r.Buyer)
             .FirstOrDefaultAsync(g => g.Id == id);
 
         if (gig == null)
@@ -92,6 +95,7 @@ public class GigController : Controller
 
         var gigs = await _context.Gigs
             .Include(g => g.Category)
+            .Include(g => g.Reviews)
             .Where(g => g.SellerId == userId)
             .OrderByDescending(g => g.CreatedAt)
             .ToListAsync();

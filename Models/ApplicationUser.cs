@@ -16,4 +16,6 @@ public class ApplicationUser : IdentityUser
     // Navigation properties
     public virtual Wallet? Wallet { get; set; }
     public virtual ICollection<Gig> Gigs { get; set; } = new List<Gig>();
+    public virtual ICollection<Review> ReviewsReceived { get; set; } = new List<Review>();
+    public virtual ICollection<Review> ReviewsGiven { get; set; } = new List<Review>();
 }

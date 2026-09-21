@@ -193,9 +193,19 @@
                                 </a>
                             </h6>
 
-                            <div class="d-flex align-items-center gap-3 text-muted small my-2" style="font-size: 0.8rem;">
+                            <div class="d-flex align-items-center justify-content-between text-muted small my-2" style="font-size: 0.8rem;">
                                 <span><i class="bi bi-clock me-1 text-primary"></i>@gig.DeliveryDays Days</span>
-                                <span><i class="bi bi-arrow-repeat me-1 text-success"></i>@gig.RevisionCount Revs</span>
+                                @if (gig.Reviews.Any())
+                                {
+                                    <span class="text-warning fw-bold">
+                                        <i class="bi bi-star-fill"></i> @Math.Round(gig.Reviews.Average(r => r.Rating), 1).ToString("F1")
+                                        <span class="text-muted fw-normal">(@gig.Reviews.Count)</span>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span><i class="bi bi-arrow-repeat me-1 text-success"></i>@gig.RevisionCount Revs</span>
+                                }
                             </div>
 
                             <div class="pp-gig-footer">

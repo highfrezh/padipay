@@ -17,6 +17,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Gig> Gigs { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderDelivery> OrderDeliveries { get; set; }
+    public DbSet<Review> Reviews { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -83,5 +84,33 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(o => o.Deliveries)
             .HasForeignKey(d => d.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // One-to-One: Order - Review
+        builder.Entity<Review>()
+            .HasOne(r => r.Order)
+            .WithOne(o => o.Review)
+            .HasForeignKey<Review>(r => r.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // One-to-Many: Gig - Reviews
+        builder.Entity<Review>()
+            .HasOne(r => r.Gig)
+            .WithMany(g => g.Reviews)
+            .HasForeignKey(r => r.GigId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // One-to-Many: ApplicationUser (Buyer) - ReviewsGiven
+        builder.Entity<Review>()
+            .HasOne(r => r.Buyer)
+            .WithMany(u => u.ReviewsGiven)
+            .HasForeignKey(r => r.BuyerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // One-to-Many: ApplicationUser (Seller) - ReviewsReceived
+        builder.Entity<Review>()
+            .HasOne(r => r.Seller)
+            .WithMany(u => u.ReviewsReceived)
+            .HasForeignKey(r => r.SellerId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

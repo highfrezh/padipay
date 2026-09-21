@@ -212,10 +212,11 @@ public class OrderController : Controller
 
         var order = await _context.Orders
             .Include(o => o.Gig)
-                .ThenInclude(g => g.Category)
+                .ThenInclude(g => g!.Category)
             .Include(o => o.Buyer)
             .Include(o => o.Seller)
             .Include(o => o.Transaction)
+            .Include(o => o.Review)
             .Include(o => o.Deliveries.OrderByDescending(d => d.DeliveredAt))
             .FirstOrDefaultAsync(o => o.Id == id);
 

@@ -24,6 +24,7 @@ public class HomeController : Controller
         var recentGigs = await _context.Gigs
             .Include(g => g.Category)
             .Include(g => g.Seller)
+            .Include(g => g.Reviews)
             .Where(g => g.IsActive)
             .OrderByDescending(g => g.CreatedAt)
             .Take(8)

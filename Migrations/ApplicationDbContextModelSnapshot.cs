@@ -469,6 +469,53 @@ namespace PadiPay.Migrations
                     b.ToTable("OrderDeliveries");
                 });
 
+            modelBuilder.Entity("PadiPay.Models.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BuyerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(1500)
+                        .HasColumnType("nvarchar(1500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GigId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SellerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BuyerId");
+
+                    b.HasIndex("GigId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("SellerId");
+
+                    b.ToTable("Reviews");
+                });
+
             modelBuilder.Entity("PadiPay.Models.Transaction", b =>
                 {
                     b.Property<int>("Id")
@@ -644,6 +691,41 @@ namespace PadiPay.Migrations
                     b.Navigation("Seller");
                 });
 
+            modelBuilder.Entity("PadiPay.Models.Review", b =>
+                {
+                    b.HasOne("PadiPay.Models.ApplicationUser", "Buyer")
+                        .WithMany("ReviewsGiven")
+                        .HasForeignKey("BuyerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PadiPay.Models.Gig", "Gig")
+                        .WithMany("Reviews")
+                        .HasForeignKey("GigId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PadiPay.Models.Order", "Order")
+                        .WithOne("Review")
+                        .HasForeignKey("PadiPay.Models.Review", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PadiPay.Models.ApplicationUser", "Seller")
+                        .WithMany("ReviewsReceived")
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Buyer");
+
+                    b.Navigation("Gig");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Seller");
+                });
+
             modelBuilder.Entity("PadiPay.Models.Wallet", b =>
                 {
                     b.HasOne("PadiPay.Models.ApplicationUser", "User")
@@ -659,6 +741,10 @@ namespace PadiPay.Migrations
                 {
                     b.Navigation("Gigs");
 
+                    b.Navigation("ReviewsGiven");
+
+                    b.Navigation("ReviewsReceived");
+
                     b.Navigation("Wallet");
                 });
 
@@ -667,9 +753,16 @@ namespace PadiPay.Migrations
                     b.Navigation("Gigs");
                 });
 
+            modelBuilder.Entity("PadiPay.Models.Gig", b =>
+                {
+                    b.Navigation("Reviews");
+                });
+
             modelBuilder.Entity("PadiPay.Models.Order", b =>
                 {
                     b.Navigation("Deliveries");
+
+                    b.Navigation("Review");
                 });
 #pragma warning restore 612, 618
         }

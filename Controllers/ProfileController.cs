@@ -64,12 +64,20 @@ public class ProfileController : Controller
             return NotFound("User profile not found.");
         }
 
+        var reviews = await _context.Reviews
+            .Include(r => r.Buyer)
+            .Include(r => r.Gig)
+            .Where(r => r.SellerId == targetUserId)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+
         var isOwner = !string.IsNullOrEmpty(currentUserId) && currentUserId == user.Id;
 
         var viewModel = new UserProfileViewModel
         {
             User = user,
             ActiveGigs = user.Gigs.OrderByDescending(g => g.CreatedAt).ToList(),
+            ReviewsReceived = reviews,
             IsOwner = isOwner
         };
 
