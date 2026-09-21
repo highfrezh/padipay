@@ -142,11 +142,11 @@ PadiPay/
 
 - [x] **Milestone 1**: Core Escrow Prototype & Wallet Ledger
 - [x] **Milestone 2**: Platform Vision, Architecture & README Specification
-- [ ] **Milestone 3**: Extended `ApplicationUser` Profile, Identity Roles (`Admin`/`User`) & Database Seeding
-- [ ] **Milestone 4**: Tech Categories & Gig / Service Management (Create, Edit, Pause, Manage)
-- [ ] **Milestone 5**: Marketplace Discovery, Search, Filtering & Public Gig/Seller Profiles
-- [ ] **Milestone 6**: Complete Gig Order Lifecycle, Delivery Submissions & Escrow Integration
-- [ ] **Milestone 7**: Client Reviews, Star Ratings & Seller Reputation Metrics
+- [x] **Milestone 3**: Extended `ApplicationUser` Profile, Identity Roles (`Admin`/`User`) & Database Seeding
+- [x] **Milestone 4**: Tech Categories & Gig / Service Management (Create, Edit, Pause, Manage)
+- [x] **Milestone 5**: Marketplace Discovery, Search, Filtering & Public Gig/Seller Profiles
+- [x] **Milestone 6**: Complete Gig Order Lifecycle, Delivery Submissions & Escrow Integration
+- [x] **Milestone 7**: Client Reviews, Star Ratings & Seller Reputation Metrics
 - [ ] **Milestone 8**: Admin Portal, Dispute Resolution Center & Platform Moderation
 - [ ] **Milestone 9**: UI/UX Polish, Nigerian Tech Aesthetics & In-App Activity Notifications
 
