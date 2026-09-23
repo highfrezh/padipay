@@ -1,0 +1,92 @@
+@model IEnumerable<PadiPay.Models.Gig>
+@{
+    ViewData["Title"] = "Gig Moderation";
+    ViewData["PageIcon"] = "bi-briefcase-fill";
+}
+
+<div class="admin-table-card">
+    <div class="admin-section-header">
+        <h6><i class="bi bi-briefcase-fill me-2" style="color: var(--admin-accent);"></i>All Gig Listings (@Model.Count())</h6>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="badge rounded-pill badge-admin-completed" style="font-size: 0.72rem;">@Model.Count(g => g.IsActive) Active</span>
+            <span class="badge rounded-pill badge-admin-cancelled" style="font-size: 0.72rem;">@Model.Count(g => !g.IsActive) Paused</span>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Gig</th>
+                    <th>Seller</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Reviews</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var gig in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-semibold text-dark small" style="max-width: 220px;">
+                                <a asp-area="" asp-controller="Gig" asp-action="Details" asp-route-id="@gig.Id"
+                                   class="text-dark text-decoration-none" target="_blank">
+                                    @(gig.Title.Length > 55 ? gig.Title.Substring(0, 55) + "…" : gig.Title)
+                                </a>
+                            </div>
+                            <div class="text-muted" style="font-size: 0.7rem;">@gig.CreatedAt.ToString("MMM dd, yyyy")</div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="pp-seller-avatar" style="width: 30px; height: 30px; font-size: 0.75rem;">
+                                    @(string.IsNullOrWhiteSpace(gig.Seller?.FullName) ? "?" : gig.Seller.FullName.Trim()[0].ToString().ToUpper())
+                                </div>
+                                <span class="small fw-semibold">@(gig.Seller?.FullName ?? "Unknown")</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">@(gig.Category?.Name ?? "Uncategorised")</span>
+                        </td>
+                        <td class="fw-bold text-success small">₦@gig.Price.ToString("N0")</td>
+                        <td class="text-muted small text-center">
+                            @if (gig.Reviews.Any())
+                            {
+                                var avg = gig.Reviews.Average(r => r.Rating);
+                                <span class="text-warning">★</span> @avg.ToString("F1") <span class="text-muted">(@gig.Reviews.Count)</span>
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                        <td>
+                            @if (gig.IsActive)
+                            {
+                                <span class="badge rounded-pill badge-admin-completed" style="font-size: 0.72rem;"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill badge-admin-cancelled" style="font-size: 0.72rem;"><i class="bi bi-pause-circle-fill me-1"></i>Paused</span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-area="Admin" asp-controller="Admin" asp-action="ToggleGig" asp-route-id="@gig.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit"
+                                        class="btn btn-sm rounded-pill @(gig.IsActive ? "btn-outline-danger" : "btn-outline-success")"
+                                        style="font-size: 0.72rem;"
+                                        onclick="return confirm('@(gig.IsActive ? "Pause" : "Activate") this gig?');">
+                                    <i class="bi @(gig.IsActive ? "bi-pause-fill" : "bi-play-fill") me-1"></i>
+                                    @(gig.IsActive ? "Pause" : "Activate")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

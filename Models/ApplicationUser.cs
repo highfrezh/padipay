@@ -12,6 +12,7 @@ public class ApplicationUser : IdentityUser
     public string? ProfilePictureUrl { get; set; }
     public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     public bool IsSeller { get; set; } = true;
+    public string? AdminNotes { get; set; }
 
     // Navigation properties
     public virtual Wallet? Wallet { get; set; }

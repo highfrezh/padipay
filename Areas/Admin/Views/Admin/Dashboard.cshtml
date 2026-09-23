@@ -1,0 +1,236 @@
+@model PadiPay.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["PageIcon"] = "bi-speedometer2";
+}
+
+<!-- ─── KPI Grid ─── -->
+<div class="row g-3 mb-4">
+    <!-- Total Users -->
+    <div class="col-xl-3 col-md-6">
+        <div class="admin-kpi-card">
+            <div class="d-flex align-items-start justify-content-between mb-3">
+                <div class="admin-kpi-icon" style="background: rgba(79,70,229,0.12);">
+                    <i class="bi bi-people-fill" style="color: #4F46E5;"></i>
+                </div>
+                <span class="badge rounded-pill" style="background: rgba(79,70,229,0.1); color: #4F46E5; font-size: 0.7rem;">+@Model.TotalSellers sellers</span>
+            </div>
+            <div class="admin-kpi-value">@Model.TotalUsers</div>
+            <div class="admin-kpi-label">Total Registered Users</div>
+        </div>
+    </div>
+
+    <!-- Active Gigs -->
+    <div class="col-xl-3 col-md-6">
+        <div class="admin-kpi-card">
+            <div class="d-flex align-items-start justify-content-between mb-3">
+                <div class="admin-kpi-icon" style="background: rgba(0,192,118,0.12);">
+                    <i class="bi bi-briefcase-fill" style="color: #059669;"></i>
+                </div>
+                <span class="badge rounded-pill" style="background: rgba(0,192,118,0.1); color: #059669; font-size: 0.7rem;">@Model.PausedGigs paused</span>
+            </div>
+            <div class="admin-kpi-value">@Model.ActiveGigs</div>
+            <div class="admin-kpi-label">Active Gig Listings</div>
+        </div>
+    </div>
+
+    <!-- Escrow Volume -->
+    <div class="col-xl-3 col-md-6">
+        <div class="admin-kpi-card">
+            <div class="d-flex align-items-start justify-content-between mb-3">
+                <div class="admin-kpi-icon" style="background: rgba(245,158,11,0.12);">
+                    <i class="bi bi-shield-lock-fill" style="color: #D97706;"></i>
+                </div>
+                <span class="badge rounded-pill" style="background: rgba(0,192,118,0.1); color: #059669; font-size: 0.7rem;">₦@Model.TotalReleasedFunds.ToString("N0") released</span>
+            </div>
+            <div class="admin-kpi-value" style="font-size: 1.5rem;">₦@Model.TotalEscrowVolume.ToString("N0")</div>
+            <div class="admin-kpi-label">Total Escrow Volume</div>
+        </div>
+    </div>
+
+    <!-- Open Disputes -->
+    <div class="col-xl-3 col-md-6">
+        <div class="admin-kpi-card" style="@(Model.OpenDisputes > 0 ? "border-color: rgba(220,38,38,0.3);" : "")">
+            <div class="d-flex align-items-start justify-content-between mb-3">
+                <div class="admin-kpi-icon" style="background: rgba(220,38,38,0.12);">
+                    <i class="bi bi-exclamation-triangle-fill" style="color: #DC2626;"></i>
+                </div>
+                @if (Model.OpenDisputes > 0)
+                {
+                    <a asp-area="Admin" asp-controller="Dispute" asp-action="Index" class="badge rounded-pill text-decoration-none" style="background: rgba(220,38,38,0.12); color: #DC2626; font-size: 0.7rem;">
+                        Needs Action
+                    </a>
+                }
+                else
+                {
+                    <span class="badge rounded-pill" style="background: rgba(0,192,118,0.1); color: #059669; font-size: 0.7rem;">All Clear</span>
+                }
+            </div>
+            <div class="admin-kpi-value" style="color: @(Model.OpenDisputes > 0 ? "#DC2626" : "#1A1D27");">@Model.OpenDisputes</div>
+            <div class="admin-kpi-label">Open Disputes</div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── Secondary KPI Row ─── -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="admin-kpi-card py-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="admin-kpi-icon" style="background: rgba(0,192,118,0.12); width: 38px; height: 38px;">
+                    <i class="bi bi-check2-all" style="color: #059669; font-size: 1rem;"></i>
+                </div>
+                <div>
+                    <div class="admin-kpi-value" style="font-size: 1.4rem;">@Model.CompletedOrders</div>
+                    <div class="admin-kpi-label">Completed Orders</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="admin-kpi-card py-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="admin-kpi-icon" style="background: rgba(79,70,229,0.12); width: 38px; height: 38px;">
+                    <i class="bi bi-gear-wide-connected" style="color: #4F46E5; font-size: 1rem;"></i>
+                </div>
+                <div>
+                    <div class="admin-kpi-value" style="font-size: 1.4rem;">@Model.InProgressOrders</div>
+                    <div class="admin-kpi-label">In-Progress Orders</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="admin-kpi-card py-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="admin-kpi-icon" style="background: rgba(0,192,118,0.12); width: 38px; height: 38px;">
+                    <i class="bi bi-arrow-up-right" style="color: #059669; font-size: 1rem;"></i>
+                </div>
+                <div>
+                    <div class="admin-kpi-value" style="font-size: 1.4rem;">₦@Model.TotalReleasedFunds.ToString("N0")</div>
+                    <div class="admin-kpi-label">Funds Released</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="admin-kpi-card py-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="admin-kpi-icon" style="background: rgba(220,38,38,0.12); width: 38px; height: 38px;">
+                    <i class="bi bi-arrow-return-left" style="color: #DC2626; font-size: 1rem;"></i>
+                </div>
+                <div>
+                    <div class="admin-kpi-value" style="font-size: 1.4rem;">₦@Model.TotalRefundedFunds.ToString("N0")</div>
+                    <div class="admin-kpi-label">Total Refunded</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── Recent Orders + Disputes ─── -->
+<div class="row g-4">
+    <!-- Recent Orders Table -->
+    <div class="col-xl-7">
+        <div class="admin-table-card">
+            <div class="admin-section-header">
+                <h6><i class="bi bi-arrow-left-right me-2" style="color: var(--admin-accent);"></i>Recent Orders</h6>
+                <a asp-area="" asp-controller="Order" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill" style="font-size: 0.75rem;">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Parties</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.RecentOrders)
+                        {
+                            var badgeCls = order.Status switch {
+                                "Completed" => "badge-admin-completed",
+                                "InProgress" => "badge-admin-progress",
+                                "Disputed" => "badge-admin-disputed",
+                                "Cancelled" => "badge-admin-cancelled",
+                                _ => "badge-admin-progress"
+                            };
+                            <tr>
+                                <td>
+                                    <a asp-area="" asp-controller="Order" asp-action="Details" asp-route-id="@order.Id"
+                                       class="fw-semibold text-dark text-decoration-none small" style="font-size: 0.8rem;">
+                                        #@order.OrderNumber
+                                    </a>
+                                    <div class="text-muted" style="font-size: 0.7rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@order.GigTitle</div>
+                                </td>
+                                <td>
+                                    <div class="small fw-semibold text-dark">@order.BuyerName</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">→ @order.SellerName</div>
+                                </td>
+                                <td class="fw-bold text-success small">₦@order.Amount.ToString("N0")</td>
+                                <td><span class="badge rounded-pill px-2 py-1 @badgeCls" style="font-size: 0.7rem;">@order.Status</span></td>
+                                <td class="text-muted small">@order.CreatedAt.ToString("MMM dd")</td>
+                            </tr>
+                        }
+                        @if (!Model.RecentOrders.Any())
+                        {
+                            <tr><td colspan="5" class="text-center text-muted py-4 small">No orders yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Disputes -->
+    <div class="col-xl-5">
+        <div class="admin-table-card">
+            <div class="admin-section-header">
+                <h6><i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>Active Disputes</h6>
+                <a asp-area="Admin" asp-controller="Dispute" asp-action="Index" class="btn btn-sm btn-outline-danger rounded-pill" style="font-size: 0.75rem;">
+                    Manage All
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Dispute</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var d in Model.RecentDisputes)
+                        {
+                            var badgeCls = d.Status switch {
+                                "Open" => "badge-admin-open",
+                                "UnderReview" => "badge-admin-review",
+                                _ => "badge-admin-resolved"
+                            };
+                            <tr>
+                                <td>
+                                    <a asp-area="Admin" asp-controller="Dispute" asp-action="Details" asp-route-id="@d.Id"
+                                       class="fw-semibold text-dark text-decoration-none small">#@d.OrderNumber</a>
+                                    <div class="text-muted" style="font-size: 0.7rem;">by @d.InitiatorName</div>
+                                    <div style="font-size: 0.68rem; color: #7A8494; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@d.Reason</div>
+                                </td>
+                                <td class="fw-bold text-danger small">₦@d.OrderAmount.ToString("N0")</td>
+                                <td><span class="badge rounded-pill px-2 py-1 @badgeCls" style="font-size: 0.7rem;">@d.Status</span></td>
+                            </tr>
+                        }
+                        @if (!Model.RecentDisputes.Any())
+                        {
+                            <tr><td colspan="3" class="text-center text-muted py-4 small">
+                                <i class="bi bi-check-circle-fill text-success me-1"></i> No active disputes!
+                            </td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

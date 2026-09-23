@@ -15,14 +15,6 @@
         ? currentUser.FullName.Trim()[0].ToString().ToUpper() 
         : (User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U");
 
-    @if (User.IsInRole("Admin"))
-    {
-        <li class="nav-item">
-            <a class="nav-link pp-badge pp-badge-delivered text-decoration-none px-2.5 py-1" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-                🛡️ Admin Portal
-            </a>
-        </li>
-    }
 
     <!-- User Account Dropdown -->
     <li class="nav-item dropdown">

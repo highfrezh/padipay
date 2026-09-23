@@ -18,6 +18,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderDelivery> OrderDeliveries { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<OrderDispute> OrderDisputes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -111,6 +112,27 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(r => r.Seller)
             .WithMany(u => u.ReviewsReceived)
             .HasForeignKey(r => r.SellerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // One-to-One: Order - OrderDispute
+        builder.Entity<OrderDispute>()
+            .HasOne(d => d.Order)
+            .WithOne(o => o.Dispute)
+            .HasForeignKey<OrderDispute>(d => d.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // One-to-Many: ApplicationUser (Initiator) - OrderDisputes
+        builder.Entity<OrderDispute>()
+            .HasOne(d => d.Initiator)
+            .WithMany()
+            .HasForeignKey(d => d.InitiatorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // One-to-Many: ApplicationUser (ResolvedBy) - OrderDisputes
+        builder.Entity<OrderDispute>()
+            .HasOne(d => d.ResolvedBy)
+            .WithMany()
+            .HasForeignKey(d => d.ResolvedById)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

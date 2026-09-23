@@ -1,0 +1,268 @@
+@model PadiPay.ViewModels.AdminDisputeDetailViewModel
+@{
+    ViewData["Title"] = $"Dispute #{Model.Dispute.Id} — Arbitration";
+    ViewData["PageIcon"] = "bi-balance-scale";
+
+    var isResolved = Model.Dispute.Status == PadiPay.Models.DisputeStatus.ResolvedRefundBuyer
+                  || Model.Dispute.Status == PadiPay.Models.DisputeStatus.ResolvedPayoutSeller;
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item">
+            <a asp-area="Admin" asp-controller="Admin" asp-action="Dashboard" class="text-muted text-decoration-none">Dashboard</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-area="Admin" asp-controller="Dispute" asp-action="Index" class="text-muted text-decoration-none">Dispute Center</a>
+        </li>
+        <li class="breadcrumb-item active fw-semibold">Dispute #@Model.Dispute.Id</li>
+    </ol>
+</nav>
+
+<!-- Status Banner -->
+@if (isResolved)
+{
+    var resolvedLabel = Model.Dispute.Status == PadiPay.Models.DisputeStatus.ResolvedRefundBuyer ? "Buyer was refunded" : "Seller was paid out";
+    var resolvedIcon = Model.Dispute.Status == PadiPay.Models.DisputeStatus.ResolvedRefundBuyer ? "bi-arrow-return-left" : "bi-arrow-up-right";
+    <div class="alert d-flex align-items-center gap-3 mb-4 p-4 rounded-3" style="background: rgba(0,192,118,0.08); border: 1.5px solid rgba(0,192,118,0.3);">
+        <i class="bi bi-check-circle-fill fs-3 text-success"></i>
+        <div>
+            <div class="fw-bold text-dark">Dispute Resolved</div>
+            <div class="small text-muted">
+                <i class="bi @resolvedIcon me-1"></i>@resolvedLabel — ₦@Model.Order.Amount.ToString("N0") transferred on @Model.Dispute.ResolvedAt?.ToString("MMMM dd, yyyy") by admin.
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Dispute.AdminNotes))
+            {
+                <div class="mt-2 small text-secondary"><strong>Admin Notes:</strong> @Model.Dispute.AdminNotes</div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert d-flex align-items-center gap-3 mb-4 p-4 rounded-3" style="background: rgba(245,158,11,0.08); border: 1.5px solid rgba(245,158,11,0.3);">
+        <i class="bi bi-exclamation-triangle-fill fs-3 text-warning"></i>
+        <div>
+            <div class="fw-bold text-dark">Awaiting Admin Arbitration</div>
+            <div class="small text-muted">Review all evidence below, then issue a binding decision. This action is <strong>irreversible</strong>.</div>
+        </div>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Left: Dispute Details + Order History -->
+    <div class="col-xl-7">
+        <!-- Dispute Claim -->
+        <div class="admin-table-card p-4 mb-4">
+            <h6 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                <i class="bi bi-chat-square-text-fill text-danger"></i> Dispute Claim
+            </h6>
+            <div class="text-muted small mb-3">Raised by <strong class="text-dark">@Model.Dispute.Initiator?.FullName</strong> on @Model.Dispute.CreatedAt.ToString("MMMM dd, yyyy 'at' hh:mm tt")</div>
+
+            <div class="p-3 rounded-3 mb-3" style="background: rgba(220,38,38,0.05); border: 1px solid rgba(220,38,38,0.15);">
+                <div class="fw-semibold text-dark small mb-1">Reason</div>
+                <div class="text-secondary small">@Model.Dispute.Reason</div>
+            </div>
+
+            <div class="p-3 rounded-3" style="background: #F8FAFD; border: 1px solid #E5EAF2;">
+                <div class="fw-semibold text-dark small mb-2">Explanation</div>
+                <div class="text-secondary small" style="white-space: pre-line; line-height: 1.7;">@Model.Dispute.Explanation</div>
+            </div>
+        </div>
+
+        <!-- Delivery Submissions -->
+        <div class="admin-table-card p-4 mb-4">
+            <h6 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-box-seam-fill text-success"></i> Seller Deliverables (@Model.Order.Deliveries.Count)
+            </h6>
+            @if (Model.Order.Deliveries.Any())
+            {
+                @foreach (var delivery in Model.Order.Deliveries)
+                {
+                    <div class="p-3 rounded-3 border mb-3 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                            <span class="fw-semibold text-dark small"><i class="bi bi-check-circle-fill text-success me-1"></i>Submission</span>
+                            <span class="text-muted" style="font-size: 0.72rem;">@delivery.DeliveredAt.ToString("MMM dd, yyyy 'at' hh:mm tt")</span>
+                        </div>
+                        <p class="text-secondary small mb-3" style="white-space: pre-line; line-height: 1.6;">@delivery.Message</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            @if (!string.IsNullOrEmpty(delivery.LivePreviewUrl))
+                            {
+                                <a href="@delivery.LivePreviewUrl" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary rounded-pill" style="font-size: 0.75rem;">
+                                    <i class="bi bi-globe me-1"></i>Live Preview
+                                </a>
+                            }
+                            @if (!string.IsNullOrEmpty(delivery.GithubRepoUrl))
+                            {
+                                <a href="@delivery.GithubRepoUrl" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-dark rounded-pill" style="font-size: 0.75rem;">
+                                    <i class="bi bi-github me-1"></i>GitHub Repo
+                                </a>
+                            }
+                            @if (!string.IsNullOrEmpty(delivery.DeliverableFileUrl))
+                            {
+                                <a href="@delivery.DeliverableFileUrl" download class="btn btn-sm btn-success rounded-pill text-white" style="font-size: 0.75rem;">
+                                    <i class="bi bi-download me-1"></i>Download File
+                                </a>
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(delivery.RevisionNotes))
+                        {
+                            <div class="mt-3 p-2 rounded-2 small" style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);">
+                                <strong>Buyer Revision Notes:</strong> @delivery.RevisionNotes
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center text-muted small py-3">No deliverables were submitted by the seller.</div>
+            }
+        </div>
+
+        <!-- Project Brief -->
+        <div class="admin-table-card p-4">
+            <h6 class="fw-bold text-dark mb-2 d-flex align-items-center gap-2">
+                <i class="bi bi-clipboard-check text-primary"></i> Original Project Brief
+            </h6>
+            <p class="text-muted small mb-2">Submitted by the buyer at checkout:</p>
+            <div class="p-3 rounded-3 small text-dark" style="background: #F8FAFD; white-space: pre-line; line-height: 1.7;">@Model.Order.BuyerRequirements</div>
+        </div>
+    </div>
+
+    <!-- Right: Contract + Resolution Panel -->
+    <div class="col-xl-5">
+        <!-- Order Contract Card -->
+        <div class="admin-table-card p-4 mb-4">
+            <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom">
+                <i class="bi bi-file-earmark-lock2-fill me-2" style="color: var(--admin-accent);"></i>Escrow Contract
+            </h6>
+            <div class="d-flex flex-column gap-2 small text-muted">
+                <div class="d-flex justify-content-between">
+                    <span>Order #:</span>
+                    <strong class="text-dark">@Model.Order.OrderNumber</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Gig:</span>
+                    <span class="text-dark text-truncate ms-3" style="max-width: 180px;">@Model.Order.Gig?.Title</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Category:</span>
+                    <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">@(Model.Order.Gig?.Category?.Name ?? "Tech")</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Escrow Amount:</span>
+                    <strong class="text-danger fs-6">₦@Model.Order.Amount.ToString("N0")</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Order Placed:</span>
+                    <span class="text-dark">@Model.Order.CreatedAt.ToString("MMM dd, yyyy")</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Order Status:</span>
+                    <span class="badge rounded-pill badge-admin-disputed px-2 py-1" style="font-size: 0.7rem;">@Model.Order.Status</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Deliveries:</span>
+                    <span class="text-dark">@Model.Order.Deliveries.Count submission(s)</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Revisions Used:</span>
+                    <span class="text-dark">@Model.Order.RevisionsUsed of @Model.Order.AllowedRevisions</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buyer Card -->
+        <div class="admin-table-card p-4 mb-4">
+            <div class="text-muted small fw-bold text-uppercase mb-2">Buyer (Disputant)</div>
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="pp-seller-avatar" style="width: 40px; height: 40px; font-size: 0.95rem; background: linear-gradient(135deg, #4f46e5, #00C076);">
+                    @(string.IsNullOrWhiteSpace(Model.Buyer?.FullName) ? "B" : Model.Buyer.FullName.Trim()[0].ToString().ToUpper())
+                </div>
+                <div>
+                    <div class="fw-bold text-dark small">@Model.Buyer?.FullName</div>
+                    <div class="text-muted" style="font-size: 0.72rem;">@Model.Buyer?.Email</div>
+                    <div class="text-muted" style="font-size: 0.72rem;"><i class="bi bi-geo-alt me-1"></i>@Model.Buyer?.Location</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seller Card -->
+        <div class="admin-table-card p-4 mb-4">
+            <div class="text-muted small fw-bold text-uppercase mb-2">Seller (Respondent)</div>
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="pp-seller-avatar" style="width: 40px; height: 40px; font-size: 0.95rem;">
+                    @(string.IsNullOrWhiteSpace(Model.Seller?.FullName) ? "S" : Model.Seller.FullName.Trim()[0].ToString().ToUpper())
+                </div>
+                <div>
+                    <div class="fw-bold text-dark small">@Model.Seller?.FullName</div>
+                    <div class="text-muted" style="font-size: 0.72rem;">@Model.Seller?.Email</div>
+                    <div class="text-muted" style="font-size: 0.72rem;"><i class="bi bi-geo-alt me-1"></i>@Model.Seller?.Location</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resolution Panel (only if not yet resolved) -->
+        @if (!isResolved)
+        {
+            <div class="admin-table-card p-4">
+                <h6 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-gavel text-danger"></i> Issue Binding Decision
+                </h6>
+                <p class="text-muted small mb-4">This action is <strong>irreversible</strong>. Funds will be transferred immediately upon confirmation.</p>
+
+                <form asp-area="Admin" asp-controller="Dispute" asp-action="Resolve" method="post" id="resolveForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="disputeId" value="@Model.Dispute.Id" />
+
+                    <!-- Admin Notes -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small text-dark">Admin Notes <span class="text-muted fw-normal">(optional, shown on resolution)</span></label>
+                        <textarea name="adminNotes" rows="3" class="form-control" placeholder="Summarise your reasoning and findings..." style="border-radius: 10px; font-size: 0.85rem;"></textarea>
+                    </div>
+
+                    <!-- Decision Buttons -->
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="resolution-card danger text-center" onclick="submitDecision('RefundBuyer')">
+                                <div class="fs-2 mb-2">↩️</div>
+                                <div class="fw-bold text-danger small">Refund Buyer</div>
+                                <div class="text-muted" style="font-size: 0.72rem; margin-top: 4px;">₦@Model.Order.Amount.ToString("N0") → @(Model.Buyer?.FullName?.Split(' ')[0] ?? "Buyer")</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="resolution-card text-center" onclick="submitDecision('PayoutSeller')">
+                                <div class="fs-2 mb-2">✅</div>
+                                <div class="fw-bold text-success small">Payout Seller</div>
+                                <div class="text-muted" style="font-size: 0.72rem; margin-top: 4px;">₦@Model.Order.Amount.ToString("N0") → @(Model.Seller?.FullName?.Split(' ')[0] ?? "Seller")</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="decision" id="decisionInput" />
+                </form>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function submitDecision(decision) {
+            const buyerName = '@(Model.Buyer?.FullName?.Split(' ')[0] ?? "the buyer")';
+            const sellerName = '@(Model.Seller?.FullName?.Split(' ')[0] ?? "the seller")';
+            const amount = '₦@Model.Order.Amount.ToString("N0")';
+
+            const msg = decision === 'RefundBuyer'
+                ? `⚠️ REFUND BUYER\n\nYou are about to refund ${amount} to ${buyerName}.\nThe order will be marked as Cancelled.\n\nThis action is irreversible. Continue?`
+                : `⚠️ PAYOUT SELLER\n\nYou are about to release ${amount} to ${sellerName}.\nThe order will be marked as Completed.\n\nThis action is irreversible. Continue?`;
+
+            if (confirm(msg)) {
+                document.getElementById('decisionInput').value = decision;
+                document.getElementById('resolveForm').submit();
+            }
+        }
+    </script>
+}

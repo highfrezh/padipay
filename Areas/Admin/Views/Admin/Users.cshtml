@@ -1,0 +1,745 @@
+@model IEnumerable<PadiPay.ViewModels.AdminUserItemViewModel>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<PadiPay.Models.ApplicationUser> UserManager
+@{
+    ViewData["Title"] = "Confidential User Management";
+    ViewData["PageIcon"] = "bi-shield-lock-fill";
+    var currentAdminId = UserManager.GetUserId(User);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-1"><i class="bi bi-shield-lock-fill me-2" style="color: var(--admin-accent);"></i>User Management & Confidential Controls</h5>
+        <p class="text-muted small mb-0">Perform secure administrative actions, audit account security, adjust wallets, and manage confidential dossiers.</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-dark px-3 py-2 text-white">
+            <i class="bi bi-people me-1"></i> Total Users: <strong>@Model.Count()</strong>
+        </span>
+        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2">
+            <i class="bi bi-slash-circle me-1"></i> Suspended: <strong>@Model.Count(u => u.IsLockedOut)</strong>
+        </span>
+    </div>
+</div>
+
+<div class="admin-table-card">
+    <div class="admin-section-header d-flex justify-content-between align-items-center">
+        <h6><i class="bi bi-people-fill me-2" style="color: var(--admin-accent);"></i>All Registered Accounts</h6>
+        <div class="text-muted small">
+            <i class="bi bi-shield-check me-1 text-success"></i> Elevated Admin Privileges Active
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>User / Identity</th>
+                    <th>Account Status</th>
+                    <th>Privileges</th>
+                    <th>Security Telemetry</th>
+                    <th>Wallet Balance</th>
+                    <th>Joined</th>
+                    <th class="text-end">Confidential Activities</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    var isCurrentAdmin = user.Id == currentAdminId;
+                    <tr class="@(user.IsLockedOut ? "table-danger bg-opacity-25" : "")">
+                        <!-- User / Identity -->
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="position-relative">
+                                    <div class="pp-seller-avatar" style="width: 40px; height: 40px; font-size: 0.9rem; @(user.IsAdmin ? "background: linear-gradient(135deg, #DC2626, #9333EA);" : "")">
+                                        @(string.IsNullOrWhiteSpace(user.FullName) ? "?" : user.FullName.Trim()[0].ToString().ToUpper())
+                                    </div>
+                                    @if (user.IsLockedOut)
+                                    {
+                                        <span class="position-absolute bottom-0 end-0 p-1 bg-danger border border-light rounded-circle" title="Suspended"></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-light rounded-circle" title="Active"></span>
+                                    }
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark small d-flex align-items-center gap-1">
+                                        @user.FullName
+                                        @if (isCurrentAdmin)
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.65rem;">You</span>
+                                        }
+                                    </div>
+                                    <div class="text-muted d-flex align-items-center gap-1" style="font-size: 0.72rem;">
+                                        @user.Email
+                                        @if (user.EmailConfirmed)
+                                        {
+                                            <i class="bi bi-patch-check-fill text-primary" title="Email Confirmed"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-exclamation-circle text-warning" title="Email Unconfirmed"></i>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Account Status -->
+                        <td>
+                            @if (user.IsLockedOut)
+                            {
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill" style="font-size: 0.72rem;">
+                                    <i class="bi bi-slash-circle me-1"></i>Suspended
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill" style="font-size: 0.72rem;">
+                                    <i class="bi bi-check-circle me-1"></i>Active
+                                </span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(user.AdminNotes))
+                            {
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle ms-1" title="Has Confidential Notes" style="font-size: 0.68rem;">
+                                    <i class="bi bi-sticky-fill"></i> Notes
+                                </span>
+                            }
+                        </td>
+
+                        <!-- Privileges & Role -->
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                @if (user.IsAdmin)
+                                {
+                                    <span class="badge bg-danger text-white rounded-pill" style="font-size: 0.7rem;">
+                                        <i class="bi bi-shield-fill-check me-1"></i>Admin
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-dark rounded-pill" style="font-size: 0.7rem;">
+                                        User
+                                    </span>
+                                }
+
+                                @if (user.IsSeller)
+                                {
+                                    <span class="badge badge-admin-completed rounded-pill" style="font-size: 0.7rem;">
+                                        <i class="bi bi-briefcase-fill me-1"></i>Seller
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-admin-progress rounded-pill" style="font-size: 0.7rem;">
+                                        <i class="bi bi-person-fill me-1"></i>Buyer
+                                    </span>
+                                }
+                            </div>
+                        </td>
+
+                        <!-- Security Telemetry -->
+                        <td class="small">
+                            <div class="text-muted" style="font-size: 0.72rem;">
+                                <span>2FA: </span>
+                                <strong class="@(user.TwoFactorEnabled ? "text-success" : "text-secondary")">
+                                    @(user.TwoFactorEnabled ? "Enabled" : "Off")
+                                </strong>
+                            </div>
+                            <div class="text-muted" style="font-size: 0.72rem;">
+                                <span>Phone: </span>@(string.IsNullOrWhiteSpace(user.PhoneNumber) ? "Not Set" : user.PhoneNumber)
+                            </div>
+                        </td>
+
+                        <!-- Wallet Balance -->
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold small" style="color: #059669;">
+                                    ₦@user.WalletBalance.ToString("N0")
+                                </span>
+                                <button type="button" class="btn btn-xs btn-outline-success rounded-pill px-2 py-0" 
+                                        style="font-size: 0.68rem;"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#walletModal"
+                                        data-userid="@user.Id"
+                                        data-username="@user.FullName"
+                                        data-userbalance="@user.WalletBalance.ToString("N2")">
+                                    <i class="bi bi-cash-coin me-1"></i>Adjust
+                                </button>
+                            </div>
+                        </td>
+
+                        <!-- Joined -->
+                        <td class="text-muted small" style="font-size: 0.75rem;">
+                            @user.JoinedAt.ToString("MMM dd, yyyy")
+                        </td>
+
+                        <!-- Confidential Activities Menu -->
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-dark dropdown-toggle rounded-pill px-3 shadow-sm" 
+                                        data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.75rem;">
+                                    <i class="bi bi-gear-fill me-1 text-warning"></i> Confidential Actions
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2" style="min-width: 230px; font-size: 0.8rem; border-radius: 0.75rem;">
+                                    <li>
+                                        <h6 class="dropdown-header text-uppercase fw-bold text-muted" style="font-size: 0.65rem;">Confidential Oversight</h6>
+                                    </li>
+                                    <!-- View Dossier Modal Trigger -->
+                                    <li>
+                                        <button type="button" class="dropdown-item d-flex align-items-center gap-2 py-2 btn-open-dossier"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#dossierModal"
+                                                data-userid="@user.Id"
+                                                data-fullname="@user.FullName"
+                                                data-email="@user.Email"
+                                                data-emailconfirmed="@user.EmailConfirmed"
+                                                data-phone="@(user.PhoneNumber ?? "Not Set")"
+                                                data-isadmin="@user.IsAdmin"
+                                                data-isseller="@user.IsSeller"
+                                                data-islockedout="@user.IsLockedOut"
+                                                data-twofa="@user.TwoFactorEnabled"
+                                                data-secstamp="@(user.SecurityStamp ?? "N/A")"
+                                                data-failedcount="@user.AccessFailedCount"
+                                                data-balance="₦@user.WalletBalance.ToString("N2")"
+                                                data-joined="@user.JoinedAt.ToString("yyyy-MM-dd HH:mm UTC")"
+                                                data-location="@user.Location"
+                                                data-gigs="@user.GigCount"
+                                                data-ordersbought="@user.OrdersAsBuyerCount"
+                                                data-orderssold="@user.OrdersAsSellerCount"
+                                                data-disputes="@user.DisputesInvolvedCount"
+                                                data-adminnotes="@user.AdminNotes">
+                                            <i class="bi bi-file-earmark-person-fill text-primary"></i>
+                                            <span><strong>View Confidential Dossier</strong></span>
+                                        </button>
+                                    </li>
+
+                                    <!-- Wallet Adjust Trigger -->
+                                    <li>
+                                        <button type="button" class="dropdown-item d-flex align-items-center gap-2 py-2"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#walletModal"
+                                                data-userid="@user.Id"
+                                                data-username="@user.FullName"
+                                                data-userbalance="@user.WalletBalance.ToString("N2")">
+                                            <i class="bi bi-currency-exchange text-success"></i>
+                                            <span>Manual Wallet Credit/Debit</span>
+                                        </button>
+                                    </li>
+
+                                    <!-- Change / Reset Password Trigger -->
+                                    <li>
+                                        <button type="button" class="dropdown-item d-flex align-items-center gap-2 py-2 text-warning"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#resetPasswordModal"
+                                                data-userid="@user.Id"
+                                                data-username="@user.FullName"
+                                                data-useremail="@user.Email">
+                                            <i class="bi bi-key-fill"></i>
+                                            <span><strong>Change / Reset Password</strong></span>
+                                        </button>
+                                    </li>
+
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <li>
+                                        <h6 class="dropdown-header text-uppercase fw-bold text-muted" style="font-size: 0.65rem;">Account Security & Roles</h6>
+                                    </li>
+
+                                    <!-- Suspend / Unlock Account -->
+                                    @if (!isCurrentAdmin)
+                                    {
+                                        <li>
+                                            <form asp-area="Admin" asp-controller="Admin" asp-action="ToggleLockout" method="post" onsubmit="return confirm('Are you sure you want to @(user.IsLockedOut ? "UNLOCK" : "SUSPEND / LOCK OUT") @user.FullName?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="dropdown-item d-flex align-items-center gap-2 py-2 @(user.IsLockedOut ? "text-success" : "text-danger")">
+                                                    <i class="bi @(user.IsLockedOut ? "bi-unlock-fill" : "bi-lock-fill")"></i>
+                                                    <span>@(user.IsLockedOut ? "Unlock Account" : "Suspend Account (Lockout)")</span>
+                                                </button>
+                                            </form>
+                                        </li>
+                                    }
+
+                                    <!-- Promote / Demote Admin -->
+                                    @if (!isCurrentAdmin)
+                                    {
+                                        <li>
+                                            <form asp-area="Admin" asp-controller="Admin" asp-action="ToggleAdminRole" method="post" onsubmit="return confirm('Are you sure you want to @(user.IsAdmin ? "DEMOTE" : "PROMOTE") @user.FullName @(user.IsAdmin ? "from" : "to") Administrator?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="dropdown-item d-flex align-items-center gap-2 py-2">
+                                                    <i class="bi bi-shield-shaded text-danger"></i>
+                                                    <span>@(user.IsAdmin ? "Revoke Admin Privilege" : "Promote to Administrator")</span>
+                                                </button>
+                                            </form>
+                                        </li>
+                                    }
+
+                                    <!-- Toggle Email Verified -->
+                                    <li>
+                                        <form asp-area="Admin" asp-controller="Admin" asp-action="ToggleEmailConfirmed" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="dropdown-item d-flex align-items-center gap-2 py-2 text-info">
+                                                <i class="bi bi-envelope-check"></i>
+                                                <span>@(user.EmailConfirmed ? "Mark Email as Unverified" : "Force Verify Email")</span>
+                                            </button>
+                                        </form>
+                                    </li>
+
+                                    <!-- Switch Seller / Buyer -->
+                                    <li>
+                                        <form asp-area="Admin" asp-controller="Admin" asp-action="ToggleSellerStatus" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="dropdown-item d-flex align-items-center gap-2 py-2">
+                                                <i class="bi bi-arrow-repeat text-secondary"></i>
+                                                <span>Switch to @(user.IsSeller ? "Buyer" : "Seller")</span>
+                                            </button>
+                                        </form>
+                                    </li>
+
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <!-- View Public Profile -->
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center gap-2 py-2 text-muted" 
+                                           asp-area="" asp-controller="Profile" asp-action="Details" asp-route-id="@user.Id" target="_blank">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                            <span>Open Public Profile</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: CONFIDENTIAL USER DOSSIER & INTERNAL ADMIN NOTES                   -->
+<!-- ========================================================================= -->
+<div class="modal fade" id="dossierModal" tabindex="-1" aria-labelledby="dossierModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
+            <div class="modal-header bg-dark text-white py-3 px-4">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-lock-fill text-warning fs-5"></i>
+                    <div>
+                        <h6 class="modal-title mb-0 fw-bold" id="dossierModalLabel">Confidential User Dossier</h6>
+                        <small class="text-white-50" style="font-size: 0.72rem;">Internal Administrator Records & Security Telemetry</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- User Basic Overview Banner -->
+                <div class="p-3 bg-light rounded-3 border mb-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1" id="dosFullName">--</h5>
+                        <div class="text-muted small" id="dosEmail">--</div>
+                    </div>
+                    <div class="text-end">
+                        <span id="dosStatusBadge" class="badge rounded-pill px-3 py-1.5">--</span>
+                        <div class="text-muted small mt-1" id="dosRoleBadge">--</div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Column 1: Security & Identity Telemetry -->
+                    <div class="col-md-6">
+                        <div class="card border rounded-3 h-100">
+                            <div class="card-header bg-transparent fw-bold small text-muted text-uppercase">
+                                <i class="bi bi-fingerprint me-1 text-primary"></i> Security & Authentication
+                            </div>
+                            <div class="card-body small">
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">User ID:</span>
+                                    <code id="dosUserId" class="text-dark" style="font-size: 0.75rem;">--</code>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Email Confirmed:</span>
+                                    <span id="dosEmailConfirmed" class="fw-semibold">--</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Phone Number:</span>
+                                    <span id="dosPhone" class="fw-semibold">--</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Two-Factor Auth:</span>
+                                    <span id="dosTwoFa" class="fw-semibold">--</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Failed Login Count:</span>
+                                    <span id="dosFailedCount" class="fw-semibold">--</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Location:</span>
+                                    <span id="dosLocation">--</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Registered Since:</span>
+                                    <span id="dosJoined">--</span>
+                                </div>
+                                <div class="py-1">
+                                    <span class="text-muted d-block">Security Stamp:</span>
+                                    <code id="dosSecStamp" class="text-truncate d-block text-secondary" style="font-size: 0.7rem;">--</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Platform Stats & Wallet -->
+                    <div class="col-md-6">
+                        <div class="card border rounded-3 h-100">
+                            <div class="card-header bg-transparent fw-bold small text-muted text-uppercase">
+                                <i class="bi bi-graph-up me-1 text-success"></i> Escrow & Financial Activity
+                            </div>
+                            <div class="card-body small">
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Current Wallet Balance:</span>
+                                    <strong id="dosBalance" class="text-success fs-6">₦0.00</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Total Gigs Listed:</span>
+                                    <span id="dosGigs" class="fw-semibold">--</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Orders Bought:</span>
+                                    <span id="dosOrdersBought" class="fw-semibold">--</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Orders Sold:</span>
+                                    <span id="dosOrdersSold" class="fw-semibold">--</span>
+                                </div>
+                                <div class="d-flex justify-content-between py-1">
+                                    <span class="text-muted">Disputes Involved:</span>
+                                    <span id="dosDisputes" class="fw-semibold">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Internal Admin Notes Editor -->
+                <div class="card border rounded-3 mt-3">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <span class="fw-bold small text-muted text-uppercase">
+                            <i class="bi bi-journal-text me-1 text-warning"></i> Confidential Admin Notes & Audit Trail
+                        </span>
+                        <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.65rem;">Visible to Admins Only</span>
+                    </div>
+                    <div class="card-body">
+                        <form asp-area="Admin" asp-controller="Admin" asp-action="SaveAdminNotes" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="UserId" id="noteUserId" value="" />
+                            <div class="mb-2">
+                                <textarea name="AdminNotes" id="dosAdminNotes" class="form-control font-monospace" rows="5" 
+                                          placeholder="Enter confidential notes, compliance flags, investigations, or manual audit reasons here..." style="font-size: 0.8rem;"></textarea>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-sm btn-dark px-3 rounded-pill">
+                                    <i class="bi bi-save me-1"></i> Save Confidential Notes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2 px-4">
+                <button type="button" class="btn btn-sm btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: MANUAL WALLET BALANCE ADJUSTMENT (CREDIT / DEBIT)                  -->
+<!-- ========================================================================= -->
+<div class="modal fade" id="walletModal" tabindex="-1" aria-labelledby="walletModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
+            <div class="modal-header bg-dark text-white py-3 px-4">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-currency-exchange text-success fs-5"></i>
+                    <div>
+                        <h6 class="modal-title mb-0 fw-bold" id="walletModalLabel">Manual Wallet Adjustment</h6>
+                        <small class="text-white-50" style="font-size: 0.72rem;">Credit or Debit balance with mandatory audit justification</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-area="Admin" asp-controller="Admin" asp-action="AdjustWallet" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="UserId" id="walletUserId" value="" />
+
+                <div class="modal-body p-4">
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <div class="small text-muted mb-1">Target Account:</div>
+                        <div class="fw-bold text-dark fs-6" id="walletUserName">--</div>
+                        <div class="small mt-1 text-muted">
+                            Current Balance: <strong class="text-success" id="walletCurrentBalance">₦0.00</strong>
+                        </div>
+                    </div>
+
+                    <!-- Adjustment Type: Credit or Debit -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Action Type</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="AdjustmentType" id="adjCredit" value="Credit" checked>
+                                <label class="btn btn-outline-success w-100 py-2 d-flex align-items-center justify-content-center gap-2" for="adjCredit">
+                                    <i class="bi bi-plus-circle-fill"></i> Credit (+)
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="AdjustmentType" id="adjDebit" value="Debit">
+                                <label class="btn btn-outline-danger w-100 py-2 d-flex align-items-center justify-content-center gap-2" for="adjDebit">
+                                    <i class="bi bi-dash-circle-fill"></i> Debit (-)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Adjustment Amount (₦)</label>
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold">₦</span>
+                            <input type="number" step="0.01" min="1" max="10000000" name="Amount" class="form-control" placeholder="e.g. 5000" required />
+                        </div>
+                        <div class="form-text" style="font-size: 0.72rem;">Debits will be verified against the user's available balance.</div>
+                    </div>
+
+                    <!-- Mandatory Audit Reason -->
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Audit Reason / Justification</label>
+                        <textarea name="Reason" class="form-control" rows="3" placeholder="State reason (e.g. Manual escrow compensation, dispute refund, test credit, fee correction)..." required maxlength="250"></textarea>
+                        <div class="form-text" style="font-size: 0.72rem;">This reason will be permanently timestamped and recorded in the confidential audit trail.</div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light py-2 px-4">
+                    <button type="button" class="btn btn-sm btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-4" onclick="return confirm('Execute this wallet adjustment?');">
+                        <i class="bi bi-check2-circle me-1"></i> Confirm & Execute
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: ADMIN RESET USER PASSWORD                                         -->
+<!-- ========================================================================= -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
+            <div class="modal-header bg-dark text-white py-3 px-4">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-key-fill text-warning fs-5"></i>
+                    <div>
+                        <h6 class="modal-title mb-0 fw-bold" id="resetPasswordModalLabel">Change User Password</h6>
+                        <small class="text-white-50" style="font-size: 0.72rem;">Set a new secure password for this user account</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-area="Admin" asp-controller="Admin" asp-action="ResetPassword" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="UserId" id="resetPasswordUserId" value="" />
+
+                <div class="modal-body p-4">
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <div class="small text-muted mb-1">Target Account:</div>
+                        <div class="fw-bold text-dark fs-6" id="resetPasswordUserName">--</div>
+                        <div class="small text-muted" id="resetPasswordUserEmail">--</div>
+                    </div>
+
+                    <div class="alert alert-warning py-2 px-3 small d-flex align-items-center gap-2 mb-3" style="font-size: 0.75rem;">
+                        <i class="bi bi-shield-exclamation fs-5 flex-shrink-0"></i>
+                        <div>Changing this password will immediately invalidate the user's active login sessions and force them to re-authenticate with the new password.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">New Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                            <input type="password" name="NewPassword" id="inputNewPassword" class="form-control" placeholder="Minimum 6 characters" required minlength="6" />
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('inputNewPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Confirm New Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                            <input type="password" name="ConfirmPassword" id="inputConfirmPassword" class="form-control" placeholder="Re-enter new password" required minlength="6" />
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('inputConfirmPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2">
+                        <button type="button" class="btn btn-xs btn-outline-dark rounded-pill px-3" style="font-size: 0.72rem;" onclick="generateRandomPassword()">
+                            <i class="bi bi-magic me-1"></i> Generate Strong Password
+                        </button>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light py-2 px-4">
+                    <button type="button" class="btn btn-sm btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-warning fw-semibold rounded-pill px-4" onclick="return confirm('Confirm changing password for this user?');">
+                        <i class="bi bi-check2-circle me-1"></i> Update Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Handle Dossier Modal Population
+    const dossierModal = document.getElementById('dossierModal');
+    if (dossierModal) {
+        dossierModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            if (!button) return;
+
+            const userId = button.getAttribute('data-userid');
+            const fullName = button.getAttribute('data-fullname');
+            const email = button.getAttribute('data-email');
+            const emailConfirmed = button.getAttribute('data-emailconfirmed') === 'True';
+            const phone = button.getAttribute('data-phone');
+            const isAdmin = button.getAttribute('data-isadmin') === 'True';
+            const isSeller = button.getAttribute('data-isseller') === 'True';
+            const isLockedOut = button.getAttribute('data-islockedout') === 'True';
+            const twoFa = button.getAttribute('data-twofa') === 'True';
+            const secStamp = button.getAttribute('data-secstamp');
+            const failedCount = button.getAttribute('data-failedcount');
+            const balance = button.getAttribute('data-balance');
+            const joined = button.getAttribute('data-joined');
+            const location = button.getAttribute('data-location');
+            const gigs = button.getAttribute('data-gigs');
+            const ordersBought = button.getAttribute('data-ordersbought');
+            const ordersSold = button.getAttribute('data-orderssold');
+            const disputes = button.getAttribute('data-disputes');
+            const adminNotes = button.getAttribute('data-adminnotes') || '';
+
+            document.getElementById('dosFullName').textContent = fullName;
+            document.getElementById('dosEmail').textContent = email;
+            document.getElementById('dosUserId').textContent = userId;
+            document.getElementById('noteUserId').value = userId;
+            document.getElementById('dosPhone').textContent = phone;
+            document.getElementById('dosFailedCount').textContent = failedCount;
+            document.getElementById('dosLocation').textContent = location;
+            document.getElementById('dosJoined').textContent = joined;
+            document.getElementById('dosSecStamp').textContent = secStamp;
+            document.getElementById('dosBalance').textContent = balance;
+            document.getElementById('dosGigs').textContent = gigs;
+            document.getElementById('dosOrdersBought').textContent = ordersBought;
+            document.getElementById('dosOrdersSold').textContent = ordersSold;
+            document.getElementById('dosDisputes').textContent = disputes;
+            document.getElementById('dosAdminNotes').value = adminNotes;
+
+            // Email Confirmed
+            const emailElem = document.getElementById('dosEmailConfirmed');
+            emailElem.textContent = emailConfirmed ? 'Verified' : 'Unverified';
+            emailElem.className = emailConfirmed ? 'fw-semibold text-primary' : 'fw-semibold text-warning';
+
+            // Two-Factor
+            const twoFaElem = document.getElementById('dosTwoFa');
+            twoFaElem.textContent = twoFa ? 'Enabled' : 'Disabled';
+            twoFaElem.className = twoFa ? 'fw-semibold text-success' : 'fw-semibold text-secondary';
+
+            // Status Badge
+            const statusBadge = document.getElementById('dosStatusBadge');
+            if (isLockedOut) {
+                statusBadge.textContent = 'Suspended (Locked Out)';
+                statusBadge.className = 'badge rounded-pill px-3 py-1.5 bg-danger text-white';
+            } else {
+                statusBadge.textContent = 'Active Account';
+                statusBadge.className = 'badge rounded-pill px-3 py-1.5 bg-success text-white';
+            }
+
+            // Role Badge
+            const roleBadge = document.getElementById('dosRoleBadge');
+            roleBadge.textContent = (isAdmin ? 'Admin • ' : 'User • ') + (isSeller ? 'Seller' : 'Buyer');
+        });
+    }
+
+    // Handle Wallet Modal Population
+    const walletModal = document.getElementById('walletModal');
+    if (walletModal) {
+        walletModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            if (!button) return;
+
+            const userId = button.getAttribute('data-userid');
+            const userName = button.getAttribute('data-username');
+            const balance = button.getAttribute('data-userbalance');
+
+            document.getElementById('walletUserId').value = userId;
+            document.getElementById('walletUserName').textContent = userName;
+            document.getElementById('walletCurrentBalance').textContent = '₦' + balance;
+        });
+    }
+
+    // Handle Reset Password Modal Population
+    const resetPasswordModal = document.getElementById('resetPasswordModal');
+    if (resetPasswordModal) {
+        resetPasswordModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            if (!button) return;
+
+            const userId = button.getAttribute('data-userid');
+            const userName = button.getAttribute('data-username');
+            const userEmail = button.getAttribute('data-useremail');
+
+            document.getElementById('resetPasswordUserId').value = userId;
+            document.getElementById('resetPasswordUserName').textContent = userName;
+            document.getElementById('resetPasswordUserEmail').textContent = userEmail;
+            document.getElementById('inputNewPassword').value = '';
+            document.getElementById('inputConfirmPassword').value = '';
+        });
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+
+    function generateRandomPassword() {
+        const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@@#$%&*";
+        let pass = "";
+        for (let i = 0; i < 10; i++) {
+            pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const p1 = document.getElementById('inputNewPassword');
+        const p2 = document.getElementById('inputConfirmPassword');
+        p1.type = 'text';
+        p2.type = 'text';
+        p1.value = pass;
+        p2.value = pass;
+    }
+</script>
+}
+

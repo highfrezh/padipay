@@ -51,4 +51,7 @@ public class Order
 
     // Client review for completed orders (1-to-1)
     public virtual Review? Review { get; set; }
+
+    // Dispute ticket if arbitration is requested (1-to-1)
+    public virtual OrderDispute? Dispute { get; set; }
 }

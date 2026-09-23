@@ -5,5 +5,6 @@ public enum TransactionStatus
     Pending,
     Funded,
     Delivered,
-    Released
+    Released,
+    Refunded
 }

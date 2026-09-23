@@ -17,6 +17,8 @@
         PadiPay.Models.OrderStatus.Delivered => "pp-badge-delivered",
         PadiPay.Models.OrderStatus.InRevision => "bg-warning text-dark",
         PadiPay.Models.OrderStatus.Completed => "pp-badge-released",
+        PadiPay.Models.OrderStatus.Disputed => "bg-danger text-white",
+        PadiPay.Models.OrderStatus.Cancelled => "bg-secondary text-white",
         _ => "bg-secondary text-white"
     };
 }
@@ -180,6 +182,99 @@
                         </div>
                     </div>
                 }
+
+                @* ── Raise a Dispute (Buyer only, when Delivered) ── *@
+                @if (isBuyer && Model.Dispute == null)
+                {
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" data-bs-toggle="collapse" data-bs-target="#disputeBox">
+                            <i class="bi bi-exclamation-triangle me-1"></i> Raise a Dispute
+                        </button>
+                    </div>
+
+                    <div class="collapse mb-4" id="disputeBox">
+                        <div class="pp-card p-4 border border-danger border-opacity-50 shadow-sm" style="background: rgba(220,38,38,0.02);">
+                            <h5 class="fw-bold text-danger mb-1 d-flex align-items-center gap-2">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Raise a Formal Dispute
+                            </h5>
+                            <p class="text-muted small mb-3">
+                                If you believe the delivered work does not match the agreed scope and revisions have been exhausted or refused, 
+                                you can escalate this to PadiPay admin for binding arbitration.
+                                Escrow funds will remain locked until a decision is issued.
+                            </p>
+                            <form asp-action="RaiseDispute" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="OrderId" value="@Model.Id" />
+                                <input type="hidden" name="OrderNumber" value="@Model.OrderNumber" />
+                                <input type="hidden" name="OrderAmount" value="@Model.Amount" />
+                                <input type="hidden" name="GigTitle" value="@Model.Gig?.Title" />
+                                <input type="hidden" name="CounterpartyName" value="@Model.Seller?.FullName" />
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small text-dark">Dispute Reason *</label>
+                                    <select name="Reason" class="form-select pp-input" required>
+                                        <option value="">Select a reason…</option>
+                                        <option value="Work delivered does not match agreed scope">Work delivered does not match agreed scope</option>
+                                        <option value="Seller is unresponsive and has not delivered">Seller is unresponsive and has not delivered</option>
+                                        <option value="Delivered code has critical bugs or does not function">Delivered code has critical bugs or does not function</option>
+                                        <option value="Plagiarised or stolen work submitted">Plagiarised or stolen work submitted</option>
+                                        <option value="Seller refused to address revision feedback">Seller refused to address revision feedback</option>
+                                        <option value="Other">Other (explain below)</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold small text-dark">Detailed Explanation * <span class="text-muted fw-normal">(min. 20 characters)</span></label>
+                                    <textarea name="Explanation" rows="5" class="form-control pp-input"
+                                              placeholder="Describe the issue in detail, what was agreed, what was delivered, and what steps you have already taken to resolve this…"
+                                              required minlength="20" maxlength="3000"></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-danger fw-bold px-4 py-2"
+                                        onclick="return confirm('Are you sure you want to raise a formal dispute? Escrow funds will remain locked until admin resolves the case.')">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> File Dispute with PadiPay Admin
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            }
+            else if (Model.Status == PadiPay.Models.OrderStatus.Disputed)
+            {
+                <div class="alert border-2 p-4 mb-4 shadow-sm rounded-3" style="background: rgba(220,38,38,0.05); border-color: rgba(220,38,38,0.3) !important;">
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-exclamation-triangle-fill fs-3 text-danger"></i>
+                        <div>
+                            <h5 class="fw-bold mb-1 text-danger">Dispute Under Admin Review</h5>
+                            <p class="mb-2 small text-secondary">
+                                A formal dispute has been filed for this order. The escrow funds of <strong>₦@Model.Amount.ToString("N0")</strong> are locked 
+                                pending a binding decision from the PadiPay admin team.
+                            </p>
+                            @if (Model.Dispute != null)
+                            {
+                                <div class="p-3 rounded-3 small" style="background: rgba(220,38,38,0.06); border: 1px solid rgba(220,38,38,0.15);">
+                                    <div class="fw-semibold text-dark mb-1">Dispute Reason</div>
+                                    <div class="text-secondary">@Model.Dispute.Reason</div>
+                                    <div class="text-muted mt-1" style="font-size: 0.72rem;">Filed @Model.Dispute.CreatedAt.ToString("MMMM dd, yyyy")</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.Status == PadiPay.Models.OrderStatus.Cancelled)
+            {
+                <div class="alert border-2 p-4 mb-4 shadow-sm rounded-3" style="background: rgba(100,116,139,0.06); border-color: rgba(100,116,139,0.25) !important;">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-x-circle-fill fs-3 text-secondary"></i>
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark">Order Cancelled — Buyer Refunded</h5>
+                            <p class="mb-0 small text-muted">
+                                This dispute was resolved in favour of the buyer. ₦@Model.Amount.ToString("N0") has been credited back to the buyer's wallet.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             }
             else if (Model.Status == PadiPay.Models.OrderStatus.Completed)
             {
@@ -455,15 +550,42 @@
                 </div>
 
                 <!-- Support & Escrow Notice -->
-                <div class="p-3 rounded-3 bg-light border small text-muted">
-                    <div class="d-flex align-items-center gap-2 mb-1 text-dark fw-bold">
-                        <i class="bi bi-shield-lock-fill text-success fs-5"></i>
-                        <span>Need Support?</span>
+                @if (Model.Dispute != null)
+                {
+                    var dLabel = Model.Dispute.Status switch {
+                        PadiPay.Models.DisputeStatus.Open => ("Open", "text-danger", "bi-exclamation-circle-fill"),
+                        PadiPay.Models.DisputeStatus.UnderReview => ("Under Review", "text-warning", "bi-eye-fill"),
+                        PadiPay.Models.DisputeStatus.ResolvedRefundBuyer => ("Resolved — Buyer Refunded", "text-success", "bi-check-circle-fill"),
+                        PadiPay.Models.DisputeStatus.ResolvedPayoutSeller => ("Resolved — Seller Paid", "text-success", "bi-check-circle-fill"),
+                        _ => ("Cancelled", "text-muted", "bi-x-circle-fill")
+                    };
+                    <div class="p-3 rounded-3 small" style="background: rgba(220,38,38,0.04); border: 1.5px solid rgba(220,38,38,0.2);">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi @dLabel.Item3 @dLabel.Item2"></i>
+                            <span class="fw-bold text-dark">Dispute #@Model.Dispute.Id</span>
+                        </div>
+                        <div class="@dLabel.Item2 fw-semibold" style="font-size: 0.8rem;">@dLabel.Item1</div>
+                        <div class="text-muted mt-1" style="font-size: 0.72rem;">Filed @Model.Dispute.CreatedAt.ToString("MMM dd, yyyy")</div>
+                        @if (!string.IsNullOrEmpty(Model.Dispute.AdminNotes))
+                        {
+                            <div class="mt-2 p-2 rounded-2" style="background: rgba(0,192,118,0.06); font-size: 0.75rem;">
+                                <strong>Admin Notes:</strong> @Model.Dispute.AdminNotes
+                            </div>
+                        }
                     </div>
-                    <p class="mb-0" style="font-size: 0.82rem;">
-                        If you encounter an issue that cannot be resolved between buyer and seller, contact PadiPay Support for administrative mediation.
-                    </p>
-                </div>
+                }
+                else
+                {
+                    <div class="p-3 rounded-3 bg-light border small text-muted">
+                        <div class="d-flex align-items-center gap-2 mb-1 text-dark fw-bold">
+                            <i class="bi bi-shield-lock-fill text-success fs-5"></i>
+                            <span>Need Support?</span>
+                        </div>
+                        <p class="mb-0" style="font-size: 0.82rem;">
+                            If you encounter an issue that cannot be resolved between buyer and seller, you can raise a formal dispute for administrative mediation.
+                        </p>
+                    </div>
+                }
             </div>
         </div>
     </div>

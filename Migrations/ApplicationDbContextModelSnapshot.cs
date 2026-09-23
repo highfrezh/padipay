@@ -163,6 +163,9 @@ namespace PadiPay.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("AdminNotes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Bio")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -469,6 +472,59 @@ namespace PadiPay.Migrations
                     b.ToTable("OrderDeliveries");
                 });
 
+            modelBuilder.Entity("PadiPay.Models.OrderDispute", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AdminNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Explanation")
+                        .IsRequired()
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
+
+                    b.Property<string>("InitiatorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ResolvedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InitiatorId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("ResolvedById");
+
+                    b.ToTable("OrderDisputes");
+                });
+
             modelBuilder.Entity("PadiPay.Models.Review", b =>
                 {
                     b.Property<int>("Id")
@@ -691,6 +747,32 @@ namespace PadiPay.Migrations
                     b.Navigation("Seller");
                 });
 
+            modelBuilder.Entity("PadiPay.Models.OrderDispute", b =>
+                {
+                    b.HasOne("PadiPay.Models.ApplicationUser", "Initiator")
+                        .WithMany()
+                        .HasForeignKey("InitiatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PadiPay.Models.Order", "Order")
+                        .WithOne("Dispute")
+                        .HasForeignKey("PadiPay.Models.OrderDispute", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PadiPay.Models.ApplicationUser", "ResolvedBy")
+                        .WithMany()
+                        .HasForeignKey("ResolvedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Initiator");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("ResolvedBy");
+                });
+
             modelBuilder.Entity("PadiPay.Models.Review", b =>
                 {
                     b.HasOne("PadiPay.Models.ApplicationUser", "Buyer")
@@ -761,6 +843,8 @@ namespace PadiPay.Migrations
             modelBuilder.Entity("PadiPay.Models.Order", b =>
                 {
                     b.Navigation("Deliveries");
+
+                    b.Navigation("Dispute");
 
                     b.Navigation("Review");
                 });

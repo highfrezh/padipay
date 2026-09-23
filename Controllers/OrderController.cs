@@ -217,6 +217,7 @@ public class OrderController : Controller
             .Include(o => o.Seller)
             .Include(o => o.Transaction)
             .Include(o => o.Review)
+            .Include(o => o.Dispute)
             .Include(o => o.Deliveries.OrderByDescending(d => d.DeliveredAt))
             .FirstOrDefaultAsync(o => o.Id == id);
 
@@ -429,6 +430,66 @@ public class OrderController : Controller
         await _context.SaveChangesAsync();
 
         TempData["SuccessMessage"] = "Revision requested! The seller has been notified with your feedback.";
+        return RedirectToAction(nameof(Details), new { id = order.Id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RaiseDispute(RaiseDisputeViewModel model)
+    {
+        var buyerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(buyerId))
+        {
+            return Unauthorized();
+        }
+
+        var order = await _context.Orders
+            .Include(o => o.Dispute)
+            .FirstOrDefaultAsync(o => o.Id == model.OrderId);
+
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        if (order.BuyerId != buyerId)
+        {
+            return Forbid();
+        }
+
+        if (order.Status != OrderStatus.Delivered)
+        {
+            TempData["ErrorMessage"] = "A dispute can only be raised on an order that has been delivered but not yet accepted.";
+            return RedirectToAction(nameof(Details), new { id = order.Id });
+        }
+
+        if (order.Dispute != null)
+        {
+            TempData["ErrorMessage"] = "A dispute has already been raised for this order.";
+            return RedirectToAction(nameof(Details), new { id = order.Id });
+        }
+
+        if (!ModelState.IsValid)
+        {
+            TempData["ErrorMessage"] = "Please fill in all required fields before submitting the dispute.";
+            return RedirectToAction(nameof(Details), new { id = order.Id });
+        }
+
+        var dispute = new OrderDispute
+        {
+            OrderId = order.Id,
+            InitiatorId = buyerId,
+            Reason = model.Reason.Trim(),
+            Explanation = model.Explanation.Trim(),
+            Status = DisputeStatus.Open,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.OrderDisputes.Add(dispute);
+        order.Status = OrderStatus.Disputed;
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Your dispute has been filed. A PadiPay administrator will review the case and issue a binding decision.";
         return RedirectToAction(nameof(Details), new { id = order.Id });
     }
 

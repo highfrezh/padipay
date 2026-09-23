@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — PadiPay Admin</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <!-- PadiPay Site CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        :root {
+            --admin-sidebar-bg: #0B0F1A;
+            --admin-sidebar-border: rgba(0, 192, 118, 0.15);
+            --admin-accent: #00C076;
+            --admin-accent-muted: rgba(0, 192, 118, 0.12);
+            --admin-text-muted: #8B95A8;
+            --admin-hover-bg: rgba(0, 192, 118, 0.08);
+            --admin-active-bg: rgba(0, 192, 118, 0.16);
+        }
+
+        html, body { height: 100%; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: #F4F6FA; }
+
+        /* ─── Sidebar ─── */
+        .admin-sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: 250px;
+            height: 100vh;
+            background: var(--admin-sidebar-bg);
+            border-right: 1px solid var(--admin-sidebar-border);
+            display: flex;
+            flex-direction: column;
+            z-index: 1050;
+            overflow-y: auto;
+        }
+
+        .admin-sidebar-brand {
+            padding: 1.4rem 1.5rem 1.2rem;
+            border-bottom: 1px solid var(--admin-sidebar-border);
+        }
+
+        .admin-sidebar-brand .brand-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        .admin-sidebar-brand .brand-subtitle {
+            font-size: 0.7rem;
+            color: var(--admin-accent);
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .admin-nav {
+            padding: 1rem 0.75rem;
+            flex: 1;
+        }
+
+        .admin-nav-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--admin-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 0.75rem 0.75rem 0.4rem;
+        }
+
+        .admin-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.6rem 0.85rem;
+            border-radius: 10px;
+            color: var(--admin-text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.18s ease;
+            margin-bottom: 2px;
+        }
+
+        .admin-nav-link:hover {
+            background: var(--admin-hover-bg);
+            color: #fff;
+        }
+
+        .admin-nav-link.active {
+            background: var(--admin-active-bg);
+            color: var(--admin-accent);
+            font-weight: 600;
+        }
+
+        .admin-nav-link i { font-size: 1.05rem; width: 20px; text-align: center; }
+
+        .admin-nav-link .nav-badge {
+            margin-left: auto;
+            background: #E53E3E;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+        }
+
+        .admin-sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--admin-sidebar-border);
+        }
+
+        .admin-user-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .admin-avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--admin-accent), #4f46e5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        /* ─── Main Content ─── */
+        .admin-main {
+            margin-left: 250px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-topbar {
+            background: #fff;
+            border-bottom: 1px solid #E5EAF2;
+            padding: 0.85rem 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .admin-page-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1A1D27;
+            margin: 0;
+        }
+
+        .admin-content {
+            padding: 1.75rem;
+            flex: 1;
+        }
+
+        /* ─── KPI Cards ─── */
+        .admin-kpi-card {
+            background: #fff;
+            border: 1px solid #E5EAF2;
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            transition: box-shadow 0.2s ease, transform 0.18s ease;
+        }
+
+        .admin-kpi-card:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+            transform: translateY(-2px);
+        }
+
+        .admin-kpi-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .admin-kpi-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: #1A1D27;
+            line-height: 1.1;
+        }
+
+        .admin-kpi-label {
+            font-size: 0.78rem;
+            color: #7A8494;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* ─── Data Tables ─── */
+        .admin-table-card {
+            background: #fff;
+            border: 1px solid #E5EAF2;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .admin-table-card .table {
+            margin: 0;
+        }
+
+        .admin-table-card .table thead th {
+            background: #F8FAFD;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #7A8494;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid #E5EAF2;
+            padding: 0.75rem 1rem;
+        }
+
+        .admin-table-card .table tbody td {
+            padding: 0.85rem 1rem;
+            font-size: 0.875rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #F0F3F9;
+        }
+
+        .admin-table-card .table tbody tr:last-child td { border-bottom: none; }
+        .admin-table-card .table tbody tr:hover td { background: #F8FAFD; }
+
+        .admin-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem 0.75rem;
+            border-bottom: 1px solid #E5EAF2;
+        }
+
+        .admin-section-header h6 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #1A1D27;
+            margin: 0;
+        }
+
+        /* ─── Status Badges ─── */
+        .badge-admin-open { background: rgba(239, 68, 68, 0.12); color: #DC2626; }
+        .badge-admin-review { background: rgba(245, 158, 11, 0.12); color: #D97706; }
+        .badge-admin-resolved { background: rgba(0, 192, 118, 0.12); color: #059669; }
+        .badge-admin-progress { background: rgba(79, 70, 229, 0.12); color: #4F46E5; }
+        .badge-admin-completed { background: rgba(0, 192, 118, 0.12); color: #059669; }
+        .badge-admin-cancelled { background: rgba(100, 116, 139, 0.12); color: #64748B; }
+        .badge-admin-disputed { background: rgba(239, 68, 68, 0.12); color: #DC2626; }
+
+        /* ─── Resolution Card ─── */
+        .resolution-card {
+            border: 2px solid #E5EAF2;
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .resolution-card:hover { border-color: var(--admin-accent); box-shadow: 0 4px 16px rgba(0,192,118,0.12); }
+        .resolution-card.danger:hover { border-color: #DC2626; box-shadow: 0 4px 16px rgba(220,38,38,0.12); }
+
+        @@media (max-width: 991px) {
+            .admin-sidebar { width: 200px; }
+            .admin-main { margin-left: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ─── Sidebar ─── -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-brand">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-shield-lock-fill" style="color: var(--admin-accent); font-size: 1.3rem;"></i>
+                <span class="brand-title">PadiPay</span>
+            </div>
+            <div class="brand-subtitle">Admin Portal</div>
+        </div>
+
+        <nav class="admin-nav">
+            <div class="admin-nav-label">Overview</div>
+            <a href="@Url.Action("Dashboard", "Admin", new { area = "Admin" })"
+               class="admin-nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+
+            <div class="admin-nav-label mt-2">Dispute Center</div>
+            <a href="@Url.Action("Index", "Dispute", new { area = "Admin" })"
+               class="admin-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dispute" ? "active" : "")">
+                <i class="bi bi-exclamation-triangle-fill"></i> Disputes
+                @if (ViewBag.OpenDisputeCount != null && (int)ViewBag.OpenDisputeCount > 0)
+                {
+                    <span class="nav-badge">@ViewBag.OpenDisputeCount</span>
+                }
+            </a>
+
+            <div class="admin-nav-label mt-2">Marketplace</div>
+            <a href="@Url.Action("Users", "Admin", new { area = "Admin" })"
+               class="admin-nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Users" ? "active" : "")">
+                <i class="bi bi-people-fill"></i> Users
+            </a>
+            <a href="@Url.Action("Gigs", "Admin", new { area = "Admin" })"
+               class="admin-nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Gigs" ? "active" : "")">
+                <i class="bi bi-briefcase-fill"></i> Gig Moderation
+            </a>
+
+            <div class="admin-nav-label mt-2">Navigation</div>
+            <a href="@Url.Action("Index", "Home", new { area = "" })" class="admin-nav-link">
+                <i class="bi bi-house-fill"></i> Back to Marketplace
+            </a>
+        </nav>
+
+        <div class="admin-sidebar-footer">
+            <div class="admin-user-chip">
+                <div class="admin-avatar">A</div>
+                <div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #fff;">Admin</div>
+                    <div style="font-size: 0.68rem; color: var(--admin-text-muted);">Platform Administrator</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ─── Main Content ─── -->
+    <div class="admin-main">
+        <!-- Top Bar -->
+        <div class="admin-topbar">
+            <h1 class="admin-page-title">
+                <i class="bi @(ViewData["PageIcon"] ?? "bi-grid") me-2" style="color: var(--admin-accent);"></i>
+                @ViewData["Title"]
+            </h1>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge py-2 px-3 rounded-pill" style="background: rgba(0,192,118,0.1); color: #059669; font-size: 0.75rem;">
+                    <i class="bi bi-shield-check me-1"></i> Admin Session Active
+                </span>
+                <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+                        <i class="bi bi-box-arrow-right me-1"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div class="px-4 pt-3">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div>@TempData["SuccessMessage"]</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>@TempData["ErrorMessage"]</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+        </div>
+
+        <!-- Page Body -->
+        <div class="admin-content">
+            @RenderBody()
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
