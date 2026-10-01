@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PadiPay.Data;
 using PadiPay.Models;
+using PadiPay.Services;
 using PadiPay.ViewModels;
 
 namespace PadiPay.Areas.Admin.Controllers;
@@ -15,12 +16,18 @@ public class DisputeController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly INotificationService _notificationService;
 
-    public DisputeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+    public DisputeController(
+        ApplicationDbContext context, 
+        UserManager<ApplicationUser> userManager,
+        INotificationService notificationService)
     {
         _context = context;
         _userManager = userManager;
+        _notificationService = notificationService;
     }
+
 
     // GET /Admin/Dispute/Index
     public async Task<IActionResult> Index(string filter = "open")
@@ -178,9 +185,34 @@ public class DisputeController : Controller
             await _context.SaveChangesAsync();
             await dbTx.CommitAsync();
 
+            // Send notification to buyer
+            var buyerMessage = decision == "RefundBuyer"
+                ? $"Dispute on #{order.OrderNumber} resolved in your favor: ₦{order.Amount:N0} has been refunded to your wallet."
+                : $"Dispute on #{order.OrderNumber} resolved: Admin decided in favor of the freelancer. Funds have been released.";
+
+            await _notificationService.SendNotificationAsync(
+                order.BuyerId,
+                "Dispute Decision Issued ⚖️",
+                buyerMessage,
+                $"/Order/Details/{order.Id}",
+                NotificationType.DisputeResolved);
+
+            // Send notification to seller
+            var sellerMessage = decision == "PayoutSeller"
+                ? $"Dispute on #{order.OrderNumber} resolved in your favor: ₦{order.Amount:N0} has been credited to your wallet balance."
+                : $"Dispute on #{order.OrderNumber} resolved: Admin refunded escrow to the buyer.";
+
+            await _notificationService.SendNotificationAsync(
+                order.SellerId,
+                "Dispute Decision Issued ⚖️",
+                sellerMessage,
+                $"/Order/Details/{order.Id}",
+                NotificationType.DisputeResolved);
+
             var outcomeText = decision == "RefundBuyer" ? "Buyer refunded" : "Seller paid out";
             TempData["SuccessMessage"] = $"Dispute resolved: {outcomeText}. ₦{order.Amount:N0} has been transferred accordingly.";
             return RedirectToAction(nameof(Index));
+
         }
         catch (Exception)
         {

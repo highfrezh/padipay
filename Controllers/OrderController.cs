@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PadiPay.Data;
 using PadiPay.Models;
+using PadiPay.Services;
 using PadiPay.ViewModels;
 
 namespace PadiPay.Controllers;
@@ -15,17 +16,21 @@ public class OrderController : Controller
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IWebHostEnvironment _webHostEnvironment;
+    private readonly INotificationService _notificationService;
     private const long MaxDeliverableFileSize = 20 * 1024 * 1024; // 20MB
 
     public OrderController(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
-        IWebHostEnvironment webHostEnvironment)
+        IWebHostEnvironment webHostEnvironment,
+        INotificationService notificationService)
     {
         _context = context;
         _userManager = userManager;
         _webHostEnvironment = webHostEnvironment;
+        _notificationService = notificationService;
     }
+
 
     [HttpGet]
     public async Task<IActionResult> Checkout(int gigId)
@@ -155,8 +160,17 @@ public class OrderController : Controller
 
             await dbTransaction.CommitAsync();
 
+            // Send notification to seller
+            await _notificationService.SendNotificationAsync(
+                gig.SellerId,
+                "New Order Received! 📦",
+                $"You have a new order (#{order.OrderNumber}) for '{gig.Title}'. Escrow amount: ₦{order.Amount:N0}.",
+                Url.Action(nameof(Details), "Order", new { id = order.Id }),
+                NotificationType.OrderPlaced);
+
             TempData["SuccessMessage"] = $"Order #{order.OrderNumber} placed! ₦{order.Amount:N0} has been secured in PadiPay escrow.";
             return RedirectToAction(nameof(Details), new { id = order.Id });
+
         }
         catch (Exception)
         {
@@ -219,6 +233,8 @@ public class OrderController : Controller
             .Include(o => o.Review)
             .Include(o => o.Dispute)
             .Include(o => o.Deliveries.OrderByDescending(d => d.DeliveredAt))
+            .Include(o => o.Messages.OrderBy(m => m.SentAt))
+                .ThenInclude(m => m.Sender)
             .FirstOrDefaultAsync(o => o.Id == id);
 
         if (order == null)
@@ -254,6 +270,7 @@ public class OrderController : Controller
 
         var order = await _context.Orders
             .Include(o => o.Deliveries)
+            .Include(o => o.Buyer)
             .FirstOrDefaultAsync(o => o.Id == model.OrderId);
 
         if (order == null)
@@ -301,6 +318,14 @@ public class OrderController : Controller
         order.DeliveredAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+
+        // Notify Buyer
+        await _notificationService.SendNotificationAsync(
+            order.BuyerId,
+            "Deliverables Submitted! 🚀",
+            $"The freelancer has delivered work for order #{order.OrderNumber}. Please review and approve payment or request a revision.",
+            Url.Action(nameof(Details), "Order", new { id = order.Id }),
+            NotificationType.WorkDelivered);
 
         TempData["SuccessMessage"] = "Work delivered successfully! The buyer has been notified to review and release payment.";
         return RedirectToAction(nameof(Details), new { id = order.Id });
@@ -370,6 +395,14 @@ public class OrderController : Controller
             await _context.SaveChangesAsync();
             await dbTransaction.CommitAsync();
 
+            // Notify Seller of payout
+            await _notificationService.SendNotificationAsync(
+                order.SellerId,
+                "Order Completed & Payout Released! 💰",
+                $"Buyer accepted delivery for #{order.OrderNumber}! ₦{order.Amount:N0} has been credited to your wallet balance.",
+                Url.Action(nameof(Details), "Order", new { id = order.Id }),
+                NotificationType.OrderCompleted);
+
             TempData["SuccessMessage"] = $"Delivery accepted! ₦{order.Amount:N0} has been released from escrow to {order.Seller?.FullName ?? "the seller"}.";
             return RedirectToAction(nameof(Details), new { id = order.Id });
         }
@@ -393,6 +426,7 @@ public class OrderController : Controller
 
         var order = await _context.Orders
             .Include(o => o.Deliveries.OrderByDescending(d => d.DeliveredAt))
+            .Include(o => o.Seller)
             .FirstOrDefaultAsync(o => o.Id == model.OrderId);
 
         if (order == null)
@@ -429,6 +463,14 @@ public class OrderController : Controller
 
         await _context.SaveChangesAsync();
 
+        // Notify Seller of revision
+        await _notificationService.SendNotificationAsync(
+            order.SellerId,
+            "Revision Requested 🔄",
+            $"The buyer has requested changes on order #{order.OrderNumber} (Revision {order.RevisionsUsed}/{order.AllowedRevisions}).",
+            Url.Action(nameof(Details), "Order", new { id = order.Id }),
+            NotificationType.RevisionRequested);
+
         TempData["SuccessMessage"] = "Revision requested! The seller has been notified with your feedback.";
         return RedirectToAction(nameof(Details), new { id = order.Id });
     }
@@ -445,6 +487,7 @@ public class OrderController : Controller
 
         var order = await _context.Orders
             .Include(o => o.Dispute)
+            .Include(o => o.Seller)
             .FirstOrDefaultAsync(o => o.Id == model.OrderId);
 
         if (order == null)
@@ -489,8 +532,93 @@ public class OrderController : Controller
         order.Status = OrderStatus.Disputed;
         await _context.SaveChangesAsync();
 
+        // Notify Seller
+        await _notificationService.SendNotificationAsync(
+            order.SellerId,
+            "Dispute Filed ⚖️",
+            $"A dispute was filed by the buyer on order #{order.OrderNumber}. Funds remain locked pending admin review.",
+            Url.Action(nameof(Details), "Order", new { id = order.Id }),
+            NotificationType.DisputeRaised);
+
         TempData["SuccessMessage"] = "Your dispute has been filed. A PadiPay administrator will review the case and issue a binding decision.";
         return RedirectToAction(nameof(Details), new { id = order.Id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SendMessage(int orderId, string message, IFormFile? attachment)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        if (string.IsNullOrWhiteSpace(message) && (attachment == null || attachment.Length == 0))
+        {
+            TempData["ErrorMessage"] = "Please enter a message or attach a file.";
+            return RedirectToAction(nameof(Details), new { id = orderId, tab = "discussion" });
+        }
+
+        var order = await _context.Orders
+            .Include(o => o.Buyer)
+            .Include(o => o.Seller)
+            .FirstOrDefaultAsync(o => o.Id == orderId);
+
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        var isBuyer = order.BuyerId == userId;
+        var isSeller = order.SellerId == userId;
+
+        if (!isBuyer && !isSeller)
+        {
+            return Forbid();
+        }
+
+        string? attachmentUrl = null;
+        string? attachmentFileName = null;
+
+        if (attachment != null && attachment.Length > 0)
+        {
+            if (attachment.Length > MaxDeliverableFileSize)
+            {
+                TempData["ErrorMessage"] = "Attachment file size cannot exceed 20 MB.";
+                return RedirectToAction(nameof(Details), new { id = orderId, tab = "discussion" });
+            }
+
+            attachmentFileName = Path.GetFileName(attachment.FileName);
+            attachmentUrl = await SaveOrderMessageFileAsync(attachment);
+        }
+
+        var orderMessage = new OrderMessage
+        {
+            OrderId = order.Id,
+            SenderId = userId,
+            Message = (message ?? string.Empty).Trim(),
+            AttachmentUrl = attachmentUrl,
+            AttachmentFileName = attachmentFileName,
+            SentAt = DateTime.UtcNow,
+            IsReadByCounterparty = false
+        };
+
+        _context.OrderMessages.Add(orderMessage);
+        await _context.SaveChangesAsync();
+
+        // Notify counterparty
+        var recipientId = isBuyer ? order.SellerId : order.BuyerId;
+        var senderName = isBuyer ? (order.Buyer?.FullName ?? "Buyer") : (order.Seller?.FullName ?? "Freelancer");
+
+        await _notificationService.SendNotificationAsync(
+            recipientId,
+            $"New message from {senderName} 💬",
+            $"{senderName}: {(orderMessage.Message.Length > 80 ? orderMessage.Message.Substring(0, 80) + "…" : orderMessage.Message)}",
+            $"/Order/Details/{order.Id}#discussion",
+            NotificationType.MessageReceived);
+
+        return RedirectToAction(nameof(Details), new { id = orderId, tab = "discussion" });
     }
 
     private async Task<string> SaveDeliverableFileAsync(IFormFile file)
@@ -509,4 +637,22 @@ public class OrderController : Controller
 
         return $"/uploads/deliveries/{uniqueFileName}";
     }
+
+    private async Task<string> SaveOrderMessageFileAsync(IFormFile file)
+    {
+        var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "order-messages");
+        if (!Directory.Exists(uploadsFolder))
+        {
+            Directory.CreateDirectory(uploadsFolder);
+        }
+
+        var uniqueFileName = $"{Guid.NewGuid():N}_{Path.GetFileName(file.FileName)}";
+        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+        using var fileStream = new FileStream(filePath, FileMode.Create);
+        await file.CopyToAsync(fileStream);
+
+        return $"/uploads/order-messages/{uniqueFileName}";
+    }
 }
+

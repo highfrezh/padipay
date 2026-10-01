@@ -19,8 +19,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<OrderDelivery> OrderDeliveries { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<OrderDispute> OrderDisputes { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<OrderMessage> OrderMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
+
     {
         base.OnModelCreating(builder);
 
@@ -133,6 +136,31 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(d => d.ResolvedBy)
             .WithMany()
             .HasForeignKey(d => d.ResolvedById)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // One-to-Many: ApplicationUser - Notifications
+        builder.Entity<Notification>()
+            .HasOne(n => n.User)
+            .WithMany()
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Index for fast query of unread notifications
+        builder.Entity<Notification>()
+            .HasIndex(n => new { n.UserId, n.IsRead, n.CreatedAt });
+
+        // One-to-Many: Order - OrderMessages
+        builder.Entity<OrderMessage>()
+            .HasOne(m => m.Order)
+            .WithMany(o => o.Messages)
+            .HasForeignKey(m => m.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // One-to-Many: ApplicationUser (Sender) - OrderMessages
+        builder.Entity<OrderMessage>()
+            .HasOne(m => m.Sender)
+            .WithMany()
+            .HasForeignKey(m => m.SenderId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -147,8 +147,9 @@ PadiPay/
 - [x] **Milestone 5**: Marketplace Discovery, Search, Filtering & Public Gig/Seller Profiles
 - [x] **Milestone 6**: Complete Gig Order Lifecycle, Delivery Submissions & Escrow Integration
 - [x] **Milestone 7**: Client Reviews, Star Ratings & Seller Reputation Metrics
-- [ ] **Milestone 8**: Admin Portal, Dispute Resolution Center & Platform Moderation
-- [ ] **Milestone 9**: UI/UX Polish, Nigerian Tech Aesthetics & In-App Activity Notifications
+- [x] **Milestone 8**: Admin Portal, Dispute Resolution Center & Platform Moderation
+- [x] **Milestone 9**: In-App Activity Notifications Engine, Navbar Bell Dropdown & In-Order Direct Messaging
+
 
 ---
 

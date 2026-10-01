@@ -54,4 +54,8 @@ public class Order
 
     // Dispute ticket if arbitration is requested (1-to-1)
     public virtual OrderDispute? Dispute { get; set; }
+
+    // Direct in-order discussion thread messages
+    public virtual ICollection<OrderMessage> Messages { get; set; } = new List<OrderMessage>();
 }
+

@@ -1,8 +1,10 @@
 @using Microsoft.AspNetCore.Identity
 @using PadiPay.Models
+@using PadiPay.Services
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@inject INotificationService NotificationService
 
 <ul class="navbar-nav align-items-center gap-2">
 @if (SignInManager.IsSignedIn(User))
@@ -14,7 +16,47 @@
     var initial = !string.IsNullOrWhiteSpace(currentUser?.FullName) 
         ? currentUser.FullName.Trim()[0].ToString().ToUpper() 
         : (User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U");
+    var unreadCount = currentUser != null ? await NotificationService.GetUnreadCountAsync(currentUser.Id) : 0;
 
+    <!-- Notification Bell Dropdown -->
+    <li class="nav-item dropdown position-relative me-1">
+        <a class="nav-link p-2 rounded-circle text-dark d-flex align-items-center justify-content-center position-relative" 
+           href="#" id="navbarNotifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" 
+           style="width: 36px; height: 36px; background: rgba(0,0,0,0.03);" title="Notifications">
+            <i class="bi bi-bell-fill fs-6 text-secondary"></i>
+            <span id="navbarNotifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                  style="font-size: 0.65rem; @(unreadCount > 0 ? "" : "display: none;")">
+                @(unreadCount > 99 ? "99+" : unreadCount.ToString())
+            </span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0 mt-2 rounded-4 overflow-hidden" 
+             aria-labelledby="navbarNotifDropdown" style="width: 340px; max-width: 90vw;">
+            <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-white">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold text-dark small">Notifications</span>
+                    <span id="navbarNotifCountPill" class="badge bg-primary bg-opacity-10 text-primary rounded-pill" style="font-size: 0.7rem; @(unreadCount > 0 ? "" : "display: none;")">
+                        @unreadCount unread
+                    </span>
+                </div>
+                <button type="button" id="btnNavbarMarkAllRead" class="btn btn-sm btn-link p-0 text-decoration-none text-muted" style="font-size: 0.75rem;">
+                    Mark all read
+                </button>
+            </div>
+            
+            <div id="navbarNotifList" class="overflow-auto" style="max-height: 320px;">
+                <div class="text-center py-4 text-muted small" id="navbarNotifSpinner">
+                    <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                    <div>Loading notifications...</div>
+                </div>
+            </div>
+
+            <div class="p-2 border-top text-center bg-light">
+                <a asp-area="" asp-controller="Notification" asp-action="Index" class="text-decoration-none small fw-semibold text-primary d-block py-1">
+                    View all notifications <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </li>
 
     <!-- User Account Dropdown -->
     <li class="nav-item dropdown">
@@ -61,6 +103,11 @@
             <li>
                 <a class="dropdown-item d-flex align-items-center gap-2 py-2 small" asp-area="" asp-controller="Order" asp-action="Index">
                     <i class="bi bi-arrow-left-right text-warning"></i> Escrow Orders
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2 small" asp-area="" asp-controller="Notification" asp-action="Index">
+                    <i class="bi bi-bell text-danger"></i> Notification Center
                 </a>
             </li>
             <li><hr class="dropdown-divider my-1"></li>
